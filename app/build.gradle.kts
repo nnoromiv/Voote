@@ -2,15 +2,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" // this version matches your Kotlin version
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     namespace = "com.example.voote"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.voote"
-        minSdk = 24
+        minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
@@ -95,6 +96,12 @@ dependencies {
     implementation (libs.androidx.camera.camera2)
     implementation (libs.androidx.camera.lifecycle)
     implementation (libs.androidx.camera.view)
+    implementation (libs.play.services.location)
 
-//    implementation (libs.barcode.scanning)
+
+    implementation (libs.barcode.scanning)
+    implementation (libs.text.recognition)
+    implementation(libs.face.detection)
+
+    implementation(libs.kotlinx.serialization.json) // latest stable as of mid-2024
 }

@@ -18,12 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.voote.model.data.BottomNavigationItems
-import com.example.voote.navigation.Routes
 
 @Composable
 fun BottomNavigation(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: Routes.HOME
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Surface(
         color = Color.Black,
@@ -42,7 +41,7 @@ fun BottomNavigation(navController: NavController) {
             contentColor = Color.White,
         ) {
             BottomNavigationItems.items.forEach { item ->
-                val isSelected = currentRoute == item.route
+                val isSelected = currentRoute?.contains(item.route::class.simpleName ?: "") == true
 
                 NavigationBarItem(
                     icon = {
@@ -62,13 +61,13 @@ fun BottomNavigation(navController: NavController) {
                     onClick = {
                         if (!isSelected) {
                             navController.navigate(item.route) {
-                                // Avoid multiple copies of the same destination
                                 launchSingleTop = true
                                 popUpTo(navController.graph.startDestinationId) {
                                     saveState = true
                                 }
                                 restoreState = true
                             }
+
                         }
                     },
                     alwaysShowLabel = false,

@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Approval
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,9 +39,11 @@ fun CandidateModal(
         sheetState = sheetState,
         containerColor = Color.White,
     ) {
-        Column (
-            modifier = Modifier.padding(horizontal =  10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Column(
+            modifier = Modifier
+                .padding(start =  10.dp, bottom = 10.dp, end = 10.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             ProfileBar(
                 name = selectedCandidate!!.name,
@@ -47,6 +51,7 @@ fun CandidateModal(
                 userImageUri = Constants().imageUrl.toUri(),
                 imageVector = Icons.Outlined.Approval
             )
+
             Socials()
 
             Body(

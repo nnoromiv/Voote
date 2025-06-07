@@ -36,7 +36,7 @@ class CountDown(
 
     @Composable
     fun Card() {
-        val height = if (contractAddress != null) 150 else 100
+        val height = if (contractAddress != null) 120 else 100
 
         Card (
             modifier = Modifier

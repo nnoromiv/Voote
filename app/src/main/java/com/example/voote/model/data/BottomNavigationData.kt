@@ -12,57 +12,62 @@ import androidx.compose.material.icons.rounded.HowToVote
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.voote.navigation.Routes
+import com.example.voote.navigation.AppRoute
+import com.example.voote.navigation.electionsObject
+import com.example.voote.navigation.historyObject
+import com.example.voote.navigation.homeObject
+import com.example.voote.navigation.profileObject
+import com.example.voote.navigation.scanObject
 
 sealed class BottomNavigationItems(
     val icon: ImageVector,
     val selectedIcon: ImageVector,
     val label: String,
-    val route: String
+    val route: AppRoute
 ){
 
-    data object Home : BottomNavigationItems(
-        icon = Icons.Outlined.Home,
-        selectedIcon = Icons.Rounded.Home,
-        label = "Home",
-        route = Routes.HOME
+    data object HomeItem : BottomNavigationItems(
+        Icons.Outlined.Home,
+        Icons.Rounded.Home,
+        "Home",
+        homeObject
     )
 
-    data object Elections : BottomNavigationItems(
-        icon = Icons.Outlined.HowToVote,
-        selectedIcon = Icons.Rounded.HowToVote,
-        label = "Elections",
-        route = Routes.ELECTIONS
+    data object ElectionsItem : BottomNavigationItems(
+        Icons.Outlined.HowToVote,
+        Icons.Rounded.HowToVote,
+        "Elections",
+        electionsObject
     )
 
-    data object Scan : BottomNavigationItems(
-        icon = Icons.Outlined.QrCodeScanner,
-        selectedIcon = Icons.Rounded.QrCodeScanner,
-        label = "Scan",
-        route = Routes.SCAN
+    data object ScanItem : BottomNavigationItems(
+        Icons.Outlined.QrCodeScanner,
+        Icons.Rounded.QrCodeScanner,
+        "Scan",
+        scanObject
     )
 
-    data object History : BottomNavigationItems(
-        icon = Icons.Outlined.History,
-        selectedIcon = Icons.Rounded.History,
-        label = "History",
-        route = Routes.HISTORY
+    data object HistoryItem : BottomNavigationItems(
+        Icons.Outlined.History,
+        Icons.Rounded.History,
+        "History",
+        historyObject
     )
 
-    data object Profile : BottomNavigationItems(
-        icon = Icons.Outlined.Person,
-        selectedIcon = Icons.Rounded.Person,
-        label = "Profile",
-        route = Routes.PROFILE
+    data object ProfileItem : BottomNavigationItems(
+        Icons.Outlined.Person,
+        Icons.Rounded.Person,
+        "Profile",
+        profileObject
     )
 
     companion object {
         val items = listOf(
-            Home,
-            Elections,
-            Scan,
-            History,
-            Profile
+            HomeItem,
+            ElectionsItem,
+            ScanItem,
+            HistoryItem,
+            ProfileItem
         )
     }
 }

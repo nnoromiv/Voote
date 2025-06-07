@@ -99,7 +99,7 @@ fun CTextButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     color: Color = Color.Black,
-    fonSize: Int = 18
+    fonSize: Int = 18,
 ) {
     TextButton(
         onClick = onClick,
@@ -117,7 +117,7 @@ fun CTextButton(
             style = TextStyle(
                 textDecoration = TextDecoration.Underline,
             ),
-            textAlign = TextAlign.Right
+            textAlign = TextAlign.Right,
         )
     }
 }

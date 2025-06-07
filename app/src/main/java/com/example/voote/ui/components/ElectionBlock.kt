@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voote.model.data.candidateItem
-import com.example.voote.navigation.Routes
+import com.example.voote.navigation.DynamicElectionScreen
 
 @Composable
 fun ElectionBlock(navController : NavController) {
@@ -36,7 +36,7 @@ fun ElectionBlock(navController : NavController) {
 
             IconButton(
                 onClick = {
-                    navController.navigate(Routes.DYNAMIC_ELECTION_SCREEN)
+                    navController.navigate(DynamicElectionScreen)
                 }
             ) {
                 Icon(

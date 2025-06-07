@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voote.navigation.Routes
+import com.example.voote.navigation.PersonalVerification
 
 @Composable
 fun KYCReminder(
@@ -50,7 +50,7 @@ fun KYCReminder(
 
         SuggestionChip(
             onClick = {
-                navController.navigate(Routes.PERSONAL_VERIFICATION)
+                navController.navigate(PersonalVerification)
             },
             label = {
                 Component().Text(

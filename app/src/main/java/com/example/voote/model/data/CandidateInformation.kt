@@ -11,76 +11,76 @@ data class CandidateInformation(
 
 val candidateItem: List<CandidateInformation> = listOf(
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Doe"
+        Constants().imageUrl.toUri(),
+        "John Doe"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Doe"
+        Constants().imageUrl.toUri(),
+        "John Doe"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Doe"
+        Constants().imageUrl.toUri(),
+        "John Doe"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Doe"
+        Constants().imageUrl.toUri(),
+        "John Doe"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Berezanskii"
+        Constants().imageUrl.toUri(),
+        "John Berezanskii"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Doe"
+        Constants().imageUrl.toUri(),
+        "John Doe"
     ),
     CandidateInformation(
-        image = Constants().imageUrl.toUri(),
-        name = "John Doe"
+        Constants().imageUrl.toUri(),
+        "John Doe"
     ),
 
     )

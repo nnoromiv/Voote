@@ -33,4 +33,5 @@ class Constants {
             "Pledge to withdraw American troops from Iraq in a responsible manner, with a view to ending the war safely.\n" +
             "\n" +
             "Pledge to invest in renewable energy and clean energy technologies in order to reduce US dependence on foreign oil and combat climate change."
+
 }

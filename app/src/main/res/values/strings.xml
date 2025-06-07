@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Voote</string>
     <string name="easy_online_election">Easy Online Election</string>
-    <string name="main_screen_sub_text">Make your election experience better today. No additional admin fee</string>
+    <string name="main_screen_sub_text">Make your election experience better today. No additional fee</string>
     <string name="login">Login</string>
     <string name="sign_up">Sign Up</string>
 </resources>

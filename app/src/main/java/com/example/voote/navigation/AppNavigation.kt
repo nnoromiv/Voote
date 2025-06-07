@@ -4,72 +4,84 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.voote.view.election.DynamicElectionScreen
 import com.example.voote.view.election.ElectionsScreen
 import com.example.voote.view.history.HistoryScreen
 import com.example.voote.view.home.HomeScreen
-import com.example.voote.view.kyc.AddressScreen
-import com.example.voote.view.kyc.DriverLicenceScreen
-import com.example.voote.view.kyc.FaceVerificationScreen
-import com.example.voote.view.kyc.IdentityNumberScreen
+import com.example.voote.view.kyc.address.AddressScreen
+import com.example.voote.view.kyc.driverlicence.DriverLicenceScreen
+import com.example.voote.view.kyc.faceverification.FaceVerificationScreen
+import com.example.voote.view.kyc.identitynumber.IdentityNumberScreen
 import com.example.voote.view.kyc.PersonalVerificationScreen
 import com.example.voote.view.login.LoginScreen
 import com.example.voote.view.main.MainScreen
 import com.example.voote.view.profile.ProfileScreen
-import com.example.voote.view.scan.ScanScreen
+import com.example.voote.view.scan.ScanFace
+import com.example.voote.view.scan.ScanID
+import com.example.voote.view.scan.ScanQR
 import com.example.voote.view.signup.SignUpScreen
 import com.example.voote.view.signup.TokenVerificationScreen
-
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.HOME) {
-        composable(Routes.MAIN) {
+    NavHost(navController = navController, startDestination = Main) {
+        composable<Main> {
             MainScreen(navController)
         }
-        composable(Routes.LOGIN) {
+        composable<Login> {
             LoginScreen(navController)
         }
-        composable(Routes.SIGNUP) {
+        composable<Signup> {
             SignUpScreen(navController)
         }
-        composable(Routes.TOKEN_VERIFICATION) {
+        composable<TokenVerification> {
             TokenVerificationScreen(navController)
         }
-        composable(Routes.PERSONAL_VERIFICATION) {
+        composable<PersonalVerification> {
             PersonalVerificationScreen(navController)
         }
-        composable(Routes.IDENTITY_NUMBER) {
+        composable<IdentityNumber> {
             IdentityNumberScreen(navController)
         }
-        composable(Routes.DRIVER_LICENCE) {
+        composable<DriverLicence> {
             DriverLicenceScreen(navController)
         }
-        composable(Routes.ADDRESS) {
+        composable<Address>{
             AddressScreen(navController)
         }
-        composable(Routes.FACE_VERIFICATION) {
-            FaceVerificationScreen(navController)
+        composable<FaceVerification>{
+            val args = it.toRoute<FaceVerification>()
+            FaceVerificationScreen(navController, args.userImageUri)
         }
-        composable(Routes.HOME) {
+        composable<Home>{
             HomeScreen(navController)
         }
-        composable(Routes.ELECTIONS) {
+        composable<Elections>{
             ElectionsScreen(navController)
         }
-        composable(Routes.SCAN) {
-            ScanScreen()
+        composable<Scan>{
+            ScanQR()
         }
-        composable(Routes.HISTORY) {
+        composable<History> {
             HistoryScreen(navController)
         }
-        composable(Routes.PROFILE) {
+        composable<Profile> {
             ProfileScreen(navController)
         }
-        composable(Routes.DYNAMIC_ELECTION_SCREEN) {
+        composable<DynamicElectionScreen> {
             DynamicElectionScreen()
+        }
+
+        composable<ScanID> {
+            val args = it.toRoute<ScanID>()
+            ScanID(navController, args.documentType)
+        }
+
+        composable<ScanFace> {
+            ScanFace(navController)
         }
 
     }

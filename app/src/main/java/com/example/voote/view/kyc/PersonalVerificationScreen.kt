@@ -15,7 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voote.navigation.Routes
+import com.example.voote.navigation.IdentityNumber
+import com.example.voote.navigation.homeObject
 import com.example.voote.ui.components.COutlinedButton
 import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Component
@@ -32,16 +33,19 @@ fun PersonalVerificationScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Logo()
+
             Component().Text(
                 text = "Personal Information",
                 fontSize = 30,
                 fontWeight = FontWeight.Bold
             )
+
             Component().Text(
                 text = "Verification",
                 fontSize = 30,
                 fontWeight = FontWeight.Bold,
             )
+
             Component().Text(
                 text = "A valid government issued ID is required to verify your account",
                 fontSize = 16,
@@ -120,14 +124,16 @@ fun Bottom(navController: NavController) {
         PrimaryButton(
             text = "Continue",
             onClick = {
-                navController.navigate(Routes.IDENTITY_NUMBER)
+                navController.navigate(IdentityNumber)
             },
             modifier = Modifier.padding(vertical = 10.dp)
         )
 
         COutlinedButton(
             text = "Skip",
-            onClick = {},
+            onClick = {
+                navController.navigate(homeObject)
+            },
             modifier = Modifier.padding(vertical = 10.dp)
         )
         Row(
@@ -142,11 +148,6 @@ fun Bottom(navController: NavController) {
             CTextButton(
                 text = "Privacy Policy",
                 onClick = {},
-            )
-            Component().Text(
-                text = "for this process",
-                fontSize = 18,
-                fontWeight = FontWeight.Normal,
             )
         }
     }

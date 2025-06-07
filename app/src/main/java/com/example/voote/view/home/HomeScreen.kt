@@ -55,6 +55,7 @@ fun HomeScreen(navController: NavController) {
             KYCReminder(
                 navController
             )
+
             CountDown(
                 text = "Presidential Election",
                 totalTime = 1000,

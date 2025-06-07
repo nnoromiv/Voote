@@ -1,4 +1,4 @@
-package com.example.voote.utils
+package com.example.voote.utils.helpers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
