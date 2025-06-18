@@ -47,7 +47,7 @@ fun CandidateCard(
             Box(
                 modifier = Modifier.padding(vertical = 5.dp)
             ) {
-                Component().Text(
+                Text(
                     text = if (candidateName.length > 10) candidateName.substring(0, 8) + ".." else candidateName,
                     fontSize = 12,
                     softWrap = true,

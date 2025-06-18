@@ -44,7 +44,8 @@ fun TokenField(
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester[index])
-                    .height(60.dp),
+                    .fillMaxWidth()
+                    .height(50.dp),
                 singleLine = true,
                 textStyle = TextStyle(
                     fontSize = 18.sp,

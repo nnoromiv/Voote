@@ -4,4 +4,15 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
+
+    <style name="Theme.Voote" parent="Base.Theme.Voote" />
+
+
+    <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Base.Theme.Voote</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+    </style>
+
 </resources>

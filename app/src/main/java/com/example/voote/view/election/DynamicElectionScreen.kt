@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.voote.model.data.candidateItem
-import com.example.voote.ui.components.Component
 import com.example.voote.ui.components.CountDown
 import com.example.voote.ui.components.ElectionCandidateColumn
+import com.example.voote.ui.components.Text
 
 @Composable
 fun DynamicElectionScreen() {
@@ -25,7 +25,7 @@ fun DynamicElectionScreen() {
             modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Component().Text(
+            Text(
                 text = "Presidential Election 2025",
                 fontSize = 16,
                 fontWeight = FontWeight.Bold,

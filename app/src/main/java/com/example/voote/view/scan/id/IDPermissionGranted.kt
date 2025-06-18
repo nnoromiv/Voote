@@ -15,11 +15,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.voote.navigation.Address
-import com.example.voote.navigation.DriverLicence
+import com.example.voote.firebase.auth.Verification
+import com.example.voote.navigation.AddressVerification
+import com.example.voote.navigation.DriverLicenceVerification
 import com.example.voote.utils.IdAnalyser
+import com.example.voote.utils.helpers.generateHMAC
+import com.example.voote.utils.helpers.getOrCreateHMACKey
+import com.example.voote.utils.helpers.verifyHMAC
 import com.example.voote.view.scan.handleCaptureId
+import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -34,6 +41,18 @@ fun IDPermissionGranted(
 ) {
     val lifeCycleOwner = LocalLifecycleOwner.current
     val executor = ContextCompat.getMainExecutor(context)
+
+    val secretKey = getOrCreateHMACKey()
+
+    val authViewModel : AuthViewModel = viewModel()
+    val walletViewModel : WalletViewModel = viewModel()
+
+    val uid = authViewModel.userUid().toString()
+
+    val address = walletViewModel.address
+    val walletId = generateHMAC(uid + address, secretKey)
+
+    val isValid = verifyHMAC(uid + address, walletId, secretKey)
 
     val cameraProviderFuture = remember {
         ProcessCameraProvider.getInstance(context)
@@ -62,14 +81,22 @@ fun IDPermissionGranted(
 
             if(cameraReady.value && analyser.isIDinBox.value) {
                 handleCaptureId(imageCapture, executor, analyser, context) {
-                        uri ->
-                    if (uri != null) {
-                        Log.d("ImageCapture", "Image saved: $uri")
-                        Toast.makeText(context, "Image saved", Toast.LENGTH_LONG).show()
-                        when (documentType) {
-                            "passport", "brp" -> navController.navigate(DriverLicence)
-                            "DL" -> navController.navigate(Address)
-                            else -> Log.w("Navigation", "Unknown documentType: $documentType")
+                        imageUri ->
+                    if (imageUri != null) {
+                        if(isValid) {
+                            val imageToSave = documentType + "Image"
+                            Verification().uploadImage(imageUri, fileName = documentType, imageToSave) {
+                                onError -> Log.e("ImageCapture", "Error uploading image: ${onError.message}")
+                            }
+
+                            Toast.makeText(context, "Image saved", Toast.LENGTH_LONG).show()
+                            when (documentType) {
+                                "passport" -> navController.navigate(DriverLicenceVerification)
+                                "driverLicence" -> navController.navigate(AddressVerification)
+                                else -> Log.w("Navigation", "Unknown documentType: $documentType")
+                            }
+                        } else {
+                            Log.d("ImageCapture", "Image not saved")
                         }
                     } else {
                         Log.d("ImageCapture", "Image not saved")

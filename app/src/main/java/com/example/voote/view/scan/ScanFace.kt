@@ -63,10 +63,10 @@ fun faceCapture(
                 val screenHeight = Resources.getSystem().displayMetrics.heightPixels.toFloat()
 
                 val faceTargetBox = Rect(
-                    screenWidth / 2 - 300,
-                    screenHeight / 2 - 400,
-                    screenWidth / 2 + 300,
-                    screenHeight / 2 + 400
+                    screenWidth / 2 - 400,
+                    screenHeight / 2 - 600,
+                    screenWidth / 2 + 400,
+                    screenHeight / 2 + 600
                 )
 
                 val scaleX = bitmap.width / screenWidth

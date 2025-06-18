@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.voote" />
+                  <option name="mobileSdkAppId" value="1:837514064178:android:379ff0421c95e31b9ce72b" />
+                  <option name="projectId" value="voote-d4d10" />
+                  <option name="projectNumber" value="837514064178" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

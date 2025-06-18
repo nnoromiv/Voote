@@ -1,7 +1,6 @@
 package com.example.voote.view.scan.face
 
 import android.content.Context
-import android.media.FaceDetector
 import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
@@ -18,9 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.voote.navigation.FaceVerification
-import com.example.voote.navigation.ScanFace
 import com.example.voote.utils.FaceAnalyser
-import com.example.voote.view.scan.ScanFace
 import com.example.voote.view.scan.faceCapture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -105,7 +102,6 @@ fun FacePermissionGranted(
 
             faceCapture(imageCapture, executor, analyser, context) { uri ->
                 if (uri != null) {
-                    Log.d("FaceCapture", "Image saved: $uri")
                     navController.navigate(FaceVerification(
                         userImageUri = uri.toString()
                     ))

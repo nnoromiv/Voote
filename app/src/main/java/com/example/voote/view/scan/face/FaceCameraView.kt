@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.example.voote.navigation.Address
-import com.example.voote.ui.components.Component
+import com.example.voote.navigation.AddressVerification
 import com.example.voote.ui.components.PrimaryButton
+import com.example.voote.ui.components.Text
 import com.example.voote.utils.FaceAnalyser
 
 
@@ -66,7 +65,7 @@ fun FaceCameraView(
             )
 
             // Optional: Label or instruction
-            Component().Text(
+            Text(
                 "Align your face within the circle",
                 color = Color.White,
                 fontSize = 16,
@@ -79,7 +78,7 @@ fun FaceCameraView(
             PrimaryButton(
                 text = "Skip",
                 onClick = {
-                    navController.navigate(Address)
+                    navController.navigate(AddressVerification)
                 },
                 modifier = Modifier
                     .align(Alignment.TopCenter)

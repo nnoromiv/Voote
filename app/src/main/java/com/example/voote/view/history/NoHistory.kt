@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.voote.ui.components.Component
+import com.example.voote.ui.components.Text
 
 @Composable
 fun NoHistory() {
@@ -42,7 +42,7 @@ fun NoHistory() {
                 modifier = Modifier.height(20.dp)
             )
 
-            Component().Text(
+            Text(
                 "You have not cast any vote.",
                 fontSize = 18
             )

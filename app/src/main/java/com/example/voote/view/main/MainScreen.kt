@@ -20,7 +20,8 @@ fun MainScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(0.dp),
+            .padding(0.dp)
+            .background(Color(0xFFFFFFFB)),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(
@@ -29,7 +30,7 @@ fun MainScreen(navController: NavController) {
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(bottomStart = 200.dp))
                 .background(
-                    color = Color(0xFF1B1B1B).copy(alpha = 0.20f),
+                    color = Color.White,
                 ),
         ) {
             ActivityImages()

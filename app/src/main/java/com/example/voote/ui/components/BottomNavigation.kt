@@ -51,7 +51,7 @@ fun BottomNavigation(navController: NavController) {
                             modifier = Modifier.size(24.dp),
                         )
                     },
-                    label = { Component().Text(
+                    label = { Text(
                         text = item.label,
                         fontSize = 12,
                         color = Color.White,

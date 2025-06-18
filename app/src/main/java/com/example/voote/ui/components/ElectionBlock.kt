@@ -28,7 +28,7 @@ fun ElectionBlock(navController : NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Component().Text(
+            Text(
                 text = "Presidential Election 2025",
                 fontSize = 16,
                 fontWeight = FontWeight.Bold,

@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.voote.ui.components.Component
+import com.example.voote.ui.components.Text
 
 @Composable
 fun CountCard() {
@@ -33,7 +33,7 @@ fun CountCard() {
             verticalArrangement = Arrangement.Center,
         ) {
             Column {
-                Component().Text(
+                Text(
                     text = "Total Vote Count",
                     fontSize = 14,
                     fontWeight = FontWeight.Normal,
@@ -43,7 +43,7 @@ fun CountCard() {
                     modifier = Modifier.height(5.dp)
                 )
 
-                Component().Text(
+                Text(
                     text = "13 974 799",
                     fontSize = 24,
                     fontWeight = FontWeight.Bold,

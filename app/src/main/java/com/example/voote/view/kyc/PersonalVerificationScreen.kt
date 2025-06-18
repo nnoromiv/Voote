@@ -1,5 +1,8 @@
 package com.example.voote.view.kyc
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,22 +12,38 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.voote.navigation.IdentityNumber
+import com.example.voote.firebase.auth.Verification
+import com.example.voote.navigation.Login
+import com.example.voote.navigation.PassportVerification
 import com.example.voote.navigation.homeObject
 import com.example.voote.ui.components.COutlinedButton
 import com.example.voote.ui.components.CTextButton
-import com.example.voote.ui.components.Component
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.PrimaryButton
+import com.example.voote.ui.components.Text
+import com.example.voote.utils.helpers.generateHMAC
+import com.example.voote.utils.helpers.getOrCreateHMACKey
+import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.UserViewModel
+import com.example.voote.viewModel.WalletViewModel
+import com.example.voote.wallet.WalletManager
+import com.google.firebase.auth.FirebaseUser
+import java.io.File
+import androidx.compose.runtime.getValue
 
 @Composable
-fun PersonalVerificationScreen(navController: NavController) {
+fun PersonalVerificationScreen(navController: NavController, authViewModel: AuthViewModel, userViewModel: UserViewModel) {
+
+    val context = LocalContext.current
 
     Scaffold {
             innerPadding ->
@@ -34,19 +53,19 @@ fun PersonalVerificationScreen(navController: NavController) {
         ) {
             Logo()
 
-            Component().Text(
+            Text(
                 text = "Personal Information",
                 fontSize = 30,
                 fontWeight = FontWeight.Bold
             )
 
-            Component().Text(
+            Text(
                 text = "Verification",
                 fontSize = 30,
                 fontWeight = FontWeight.Bold,
             )
 
-            Component().Text(
+            Text(
                 text = "A valid government issued ID is required to verify your account",
                 fontSize = 16,
                 fontWeight = FontWeight.Normal,
@@ -62,93 +81,20 @@ fun PersonalVerificationScreen(navController: NavController) {
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                Top()
+                PersonalVerificationText()
             }
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                Bottom(
-                    navController = navController
+                PersonalVerificationButton(
+                    context,
+                    authViewModel,
+                    userViewModel,
+                    navController
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun Top() {
-    Column (
-        verticalArrangement = Arrangement.spacedBy(15.dp),
-    ) {
-        Component().Text(
-            text = "Accepted Detail for verification includes",
-            fontSize = 24,
-            fontWeight = FontWeight.Bold,
-            softWrap = true
-        )
-
-        Component().Text(
-            text = "1. Passport Number or BRP Number",
-            fontSize = 18,
-            fontWeight = FontWeight.Normal,
-            softWrap = true,
-        )
-
-        Component().Text(
-            text = "2. Driver's Licence Number",
-            fontSize = 18,
-            fontWeight = FontWeight.Normal,
-        )
-
-        Component().Text(
-            text = "3. Residential Address",
-            fontSize = 18,
-            fontWeight = FontWeight.Normal,
-        )
-
-        Component().Text(
-            text = "4. Facial Information",
-            fontSize = 18,
-            fontWeight = FontWeight.Normal,
-        )
-    }
-}
-
-@Composable
-fun Bottom(navController: NavController) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        PrimaryButton(
-            text = "Continue",
-            onClick = {
-                navController.navigate(IdentityNumber)
-            },
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
-
-        COutlinedButton(
-            text = "Skip",
-            onClick = {
-                navController.navigate(homeObject)
-            },
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Component().Text(
-                text = "We have a ",
-                fontSize = 18,
-                fontWeight = FontWeight.Normal,
-            )
-            CTextButton(
-                text = "Privacy Policy",
-                onClick = {},
-            )
         }
     }
 }

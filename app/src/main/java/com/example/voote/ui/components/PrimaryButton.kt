@@ -46,7 +46,7 @@ fun PrimaryButton(
                 containerColor = Color(0xFF1B1B1B),
                 contentColor = Color.White,
                 disabledContainerColor = Color.Gray,
-                disabledContentColor = Color(0xFF1B1B1B)
+                disabledContentColor = Color.White
             ),
         shape = shape,
         border = border
@@ -77,9 +77,11 @@ fun COutlinedButton(
         enabled = enabled,
         colors = colors
             ?: ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = Color(0xFF1B1B1B),
-            disabledContentColor = Color.White
+                containerColor = Color.Transparent,
+                contentColor = Color(0xFF1B1B1B),
+                disabledContainerColor = Color.LightGray,
+                disabledContentColor = Color.White
+
             ),
         shape = shape,
         border = border

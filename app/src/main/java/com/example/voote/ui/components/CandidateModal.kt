@@ -117,13 +117,13 @@ fun Body(
         modifier = Modifier.padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Component().Text(
+        Text(
             text = title,
             fontSize = 18,
             fontWeight = FontWeight.Bold
         )
 
-        Component().Text(
+        Text(
             text = writeUpText,
             fontSize = 15,
             softWrap = true

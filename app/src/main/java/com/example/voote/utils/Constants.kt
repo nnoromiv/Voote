@@ -11,6 +11,9 @@ import com.example.voote.R
 
 class Constants {
 
+    val passportRegex = "^[A-Z0-9]{6,10}$".toRegex()
+    val driverLicenceRegex =  "^[A-Z0-9]{5,15}$".toRegex()
+
     val centuryFontFamily = FontFamily(
         Font(R.font.century_gothic, FontWeight.Normal),
         Font(R.font.century_gothic_bold, FontWeight.Bold),

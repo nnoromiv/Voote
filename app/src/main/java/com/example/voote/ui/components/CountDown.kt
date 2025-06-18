@@ -58,7 +58,7 @@ class CountDown(
 
                     ) {
                     Column {
-                        Component().Text(
+                        Text(
                             text = text,
                             fontSize = 18,
                             fontWeight = FontWeight.Normal,
@@ -82,7 +82,7 @@ class CountDown(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End
                         ) {
-                            Component().Text(
+                            Text(
                                 text = contractAddress,
                                 fontSize = 10,
                                 fontWeight = FontWeight.Normal,
@@ -118,7 +118,7 @@ class CountDown(
             }
         }
 
-        Component().Text(
+        Text(
             text = formatTime(timeLeft),
             modifier = Modifier
                 .padding(vertical = 15.dp),

@@ -1,21 +1,29 @@
 package com.example.voote
 
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.voote.navigation.AppNavigation
 
+@Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color.GRAY,
+                Color.GRAY
+            ),
+        )
         setContent {
             App()
         }
@@ -35,11 +43,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 @Composable
 fun App() {
     AppNavigation()
 }
+
+
 
 

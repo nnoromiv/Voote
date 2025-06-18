@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.voote.ui.components.Component
 import com.example.voote.ui.components.PrimaryButton
+import com.example.voote.ui.components.Text
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 
@@ -31,7 +31,7 @@ fun PermissionDeniedScreen() {
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Component().Text(
+            Text(
                 "Camera access is required to scan",
                 fontSize = 18
             )

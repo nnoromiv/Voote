@@ -27,13 +27,13 @@ object TokenVerification
 object PersonalVerification
 
 @Serializable
-object IdentityNumber
+object PassportVerification
 
 @Serializable
-object DriverLicence
+object DriverLicenceVerification
 
 @Serializable
-object Address
+object AddressVerification
 
 @Serializable
 data class FaceVerification(

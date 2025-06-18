@@ -2,37 +2,50 @@ package com.example.voote.view.kyc.driverlicence
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DriveEta
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
-import com.example.voote.ui.components.Component
+import com.example.voote.ui.components.DateInputField
+import com.example.voote.ui.components.ErrorHandlingInputField
+import com.example.voote.utils.helpers.isDriverLicenceValid
+import com.example.voote.viewModel.KycViewModel
 
 @Composable
-fun DriverLicenceForm(
-    licenceNumber: String,
-    onIdNumberChange: (String) -> Unit
-) {
+fun DriverLicenceForm(kycViewModel: KycViewModel) {
+
+    val driverLicenceNumber by kycViewModel.driverLicenceNumber.collectAsState()
+    val driverLicenceExpiryDate by kycViewModel.driverLicenceExpiryDate.collectAsState()
+    val isIdError by kycViewModel.isIdError.collectAsState()
+    val idErrorMessage by kycViewModel.idErrorMessage.collectAsState()
+
+    fun onDriverLicenceNumberChange(value: String) {
+        val isValid = isDriverLicenceValid(value.trim())
+        kycViewModel.setIsIdError(!isValid)
+        kycViewModel.setIdErrorMessage(if (isValid) "" else "Invalid Driver Licence Number")
+        kycViewModel.setDriverLicenceNumber(value.trim())
+    }
+
     Column (
         verticalArrangement = Arrangement.spacedBy(15.dp),
     ) {
 
-        Component().TextField(
-            value = licenceNumber,
-            onValueChange = onIdNumberChange,
-            label = { Text(
-                "Driver's Licence Number",
-            ) },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.DriveEta,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+        ErrorHandlingInputField(
+            driverLicenceNumber,
+            onValueChange = { onDriverLicenceNumberChange(it.trim()) },
+            isError = isIdError,
+            errorMessage = idErrorMessage,
+            label = "Driver Licence Number",
+            imageVector = Icons.Outlined.DriveEta
+        )
+
+        DateInputField(
+            label = "Driver Licence Expiry Date",
+            date = driverLicenceExpiryDate,
+            onDateSelected = {
+                kycViewModel.setDriverLicenceExpiryDate(it)
             },
         )
     }

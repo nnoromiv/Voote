@@ -16,25 +16,47 @@ import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.voote.ui.components.Component
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.voote.ui.components.ErrorHandlingInputField
+import com.example.voote.ui.components.TextField
+import com.example.voote.utils.helpers.validateEmail
+import com.example.voote.utils.helpers.validatePhoneNumber
+import com.example.voote.viewModel.SignUpViewModel
 
 @Composable
-fun SignUpForm(
-    firstName: String,
-    onFirstNameChange: (String) -> Unit,
-    lastName: String,
-    onLastNameChange: (String) -> Unit,
-    email: String,
-    onEmailChange: (String) -> Unit,
-    phone: String,
-    onPhoneChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit
-) {
+fun SignUpForm() {
+
+    val signUpViewModel : SignUpViewModel = viewModel()
+    val email by signUpViewModel.email.collectAsState()
+    val firstName by signUpViewModel.firstName.collectAsState()
+    val lastName by signUpViewModel.lastName.collectAsState()
+    val phoneNumber by signUpViewModel.phoneNumber.collectAsState()
+    val password by signUpViewModel.password.collectAsState()
+    val isEmailError by signUpViewModel.isEmailError.collectAsState()
+    val emailErrorMessage by signUpViewModel.emailErrorMessage.collectAsState()
+    val isPhoneNumberError by signUpViewModel.isPhoneNumberError.collectAsState()
+    val phoneNumberErrorMessage by signUpViewModel.phoneNumberErrorMessage.collectAsState()
+
+    fun onEmailChange(value: String) {
+        val (error, message) = validateEmail(value.trim())
+        signUpViewModel.setIsEmailError(error)
+        signUpViewModel.setEmailErrorMessage(message)
+        signUpViewModel.setEmail(value.trim())
+    }
+
+    fun onPhoneNumberChange(value: String) {
+        val (error, message) = validatePhoneNumber(value.trim())
+        signUpViewModel.setIsPhoneNumberError(error)
+        signUpViewModel.setPhoneNumberErrorMessage(message)
+        signUpViewModel.setPhoneNumber(value.trim())
+    }
+
     Column (
         verticalArrangement = Arrangement.spacedBy(15.dp),
     ) {
@@ -46,9 +68,9 @@ fun SignUpForm(
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
-                Component().TextField(
+                TextField(
                     value = firstName,
-                    onValueChange = onFirstNameChange,
+                    onValueChange = { signUpViewModel.setLastName(it.trim()) },
                     label = { Text("First Name") },
                     trailingIcon = {
                         Icon(
@@ -65,9 +87,9 @@ fun SignUpForm(
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
-                Component().TextField(
+                TextField(
                     value = lastName,
-                    onValueChange = onLastNameChange,
+                    onValueChange = { signUpViewModel.setLastName(it.trim()) },
                     label = { Text("Last Name") },
                     trailingIcon = {
                         Icon(
@@ -82,42 +104,38 @@ fun SignUpForm(
 
         }
 
-        Component().TextField(
-            value = email,
-            onValueChange = onEmailChange,
-            label = { Text("Email") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Email,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            },
+        ErrorHandlingInputField(
+            email,
+            onValueChange = { onEmailChange(it) },
+            isError = isEmailError,
+            errorMessage = emailErrorMessage,
+            label = "Email",
+            imageVector = Icons.Outlined.Email,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
             )
         )
 
-        Component().TextField(
-            value = phone,
-            onValueChange = onPhoneChange,
-            label = { Text("Phone Number") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Phone,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            },
+        ErrorHandlingInputField(
+            phoneNumber,
+            onValueChange = { onPhoneNumberChange(it) },
+            isError = isPhoneNumberError,
+            errorMessage = phoneNumberErrorMessage,
+            label = "Phone Number",
+            imageVector = Icons.Outlined.Phone,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Phone,
             )
         )
 
-        Component().TextField(
+
+        TextField(
             value = password,
-            onValueChange = onPasswordChange,
+            onValueChange = { signUpViewModel.setPassword(it.trim()) },
             label = { Text("Password") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+            ),
             visualTransformation = PasswordVisualTransformation(),
             trailingIcon = {
                 Icon(
@@ -126,9 +144,6 @@ fun SignUpForm(
                     modifier = Modifier.size(24.dp)
                 )
             },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-            )
         )
     }
 }

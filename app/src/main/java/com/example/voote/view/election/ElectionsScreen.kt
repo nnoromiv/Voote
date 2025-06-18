@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,10 +20,14 @@ import com.example.voote.ui.components.BottomNavigation
 import com.example.voote.ui.components.ElectionBlock
 import com.example.voote.ui.components.KYCReminder
 import com.example.voote.view.home.SearchForElection
+import com.example.voote.viewModel.KycViewModel
 
 @Composable
-fun ElectionsScreen(navController: NavController) {
+fun ElectionsScreen(navController: NavController, kycViewModel: KycViewModel
+) {
     var searchValue by remember { mutableStateOf("") }
+
+    val kycCompletionPercentage by kycViewModel.kycCompletionPercentage.collectAsState()
 
     Scaffold (
         bottomBar = { BottomNavigation(navController) }
@@ -38,7 +43,8 @@ fun ElectionsScreen(navController: NavController) {
         ) {
 
             KYCReminder(
-                navController
+                navController,
+                kycCompletionPercentage
             )
 
             SearchForElection(

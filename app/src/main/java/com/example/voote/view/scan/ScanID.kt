@@ -52,6 +52,7 @@ fun handleCaptureId(
     context: Context,
     onImageSaved: (Uri?) -> Unit = {}
 ) {
+
     imageCapture.takePicture(
         executor,
         object : ImageCapture.OnImageCapturedCallback() {
@@ -65,10 +66,10 @@ fun handleCaptureId(
                 val screenHeight = Resources.getSystem().displayMetrics.heightPixels.toFloat()
 
                 val idTargetBox = Rect(
-                    screenWidth / 2 - 350,
-                    screenHeight / 2 - 300,
-                    screenWidth / 2 + 300,
-                    screenHeight / 2 + 350
+                    screenWidth / 2 - 250,
+                    screenHeight / 2 - 500,
+                    screenWidth / 2 + 250,
+                    screenHeight / 2 + 500
                 )
 
                 val scaleX = bitmap.width / screenWidth

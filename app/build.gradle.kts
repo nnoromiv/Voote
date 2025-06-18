@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" // this version matches your Kotlin version
     alias(libs.plugins.kotlin.serialization)
+//    id("org.springframework.boot") version "3.5.0"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -88,7 +90,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.network.okhttp)
-    implementation(libs.coil.kt.coil.compose)
+implementation(libs.coil.kt.coil.compose)
     implementation(libs.material3)
     implementation (libs.accompanist.permissions)
 
@@ -104,4 +106,16 @@ dependencies {
     implementation(libs.face.detection)
 
     implementation(libs.kotlinx.serialization.json) // latest stable as of mid-2024
+
+    implementation(libs.core)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+
+    implementation(libs.firebase.firestore)
+    implementation(libs.bcprov.jdk15on)
+    implementation(libs.gson)
+
+    implementation(libs.firebase.storage.ktx)
+
 }
