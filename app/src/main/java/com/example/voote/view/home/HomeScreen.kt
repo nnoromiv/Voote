@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,8 +60,6 @@ import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.UserViewModel
 import com.example.voote.viewModel.WalletViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 
 @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -140,8 +139,8 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
                 BottomNavigation(navController)
             }
         ) { innerPadding ->
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing),
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
                 onRefresh = {
                     coroutineScope.launch {
                         isRefreshing = true

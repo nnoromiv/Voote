@@ -32,7 +32,7 @@ class Auth() {
         val displayName = "$firstName $lastName"
 
         try {
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            auth.createUserWithEmailAndPassword(email, password).await()
             val user = auth.currentUser ?: return AppResult.Error("User session missing after sign-up")
 
             val update = UserProfileChangeRequest.Builder()
@@ -51,7 +51,7 @@ class Auth() {
             return AppResult.Success("Success", SignUpData(user))
 
         } catch (e: FirebaseAuthUserCollisionException) {
-            return AppResult.Error("Email already in use.")
+            return AppResult.Error("Email already in use: ${e.message}.")
         } catch (e: Exception) {
             Log.e("Auth", "SignUp error", e)
             return AppResult.Error("Sign-up failed: ${e.message}")
@@ -134,15 +134,15 @@ class Auth() {
             val userDocRef = db.collection("users").document(user.uid)
 
             db.runTransaction { transaction ->
-                val doc = transaction.get(userDocRef)
+                transaction.get(userDocRef)
                 transaction.update(userDocRef, "isPhoneVerified", true)
             }.await()
 
             AppResult.Success("Phone number verified")
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            return AppResult.Error("Invalid code.")
+            return AppResult.Error("Invalid code: ${e.message}.")
         } catch (e: FirebaseAuthUserCollisionException) {
-            return AppResult.Error("This phone number already linked.")
+            return AppResult.Error("This phone number already linked: ${e.message}.")
         } catch (e: Exception) {
             return AppResult.Error("Verification failed: ${e.message}")
         }
@@ -151,7 +151,7 @@ class Auth() {
 
     suspend fun logIn(email: String, password: String) : AppResult<LoginData> {
         try {
-            val result = auth.signInWithEmailAndPassword(email, password).await()
+            auth.signInWithEmailAndPassword(email, password).await()
             val user = auth.currentUser ?: return AppResult.Error("User session missing after login")
 
             return AppResult.Success("Success", LoginData(user.uid))

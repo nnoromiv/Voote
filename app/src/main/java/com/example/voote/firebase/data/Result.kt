@@ -10,15 +10,15 @@ sealed class AppResult<T>(
 ) {
     class Success<T>(message: String = "", data: T? = null) : AppResult<T>(Status.SUCCESS, message, data)
     class Error<T>(message: String) : AppResult<T>(Status.ERROR, message)
-    class Pending<T>(message: String = "") : AppResult<T>(Status.PENDING, message)
-    class Continue<T>(message: String = "", data: T?) : AppResult<T>(Status.CONTINUE, message, data)
+//    class Pending<T>(message: String = "") : AppResult<T>(Status.PENDING, message)
+//    class Continue<T>(message: String = "", data: T?) : AppResult<T>(Status.CONTINUE, message, data)
 }
 
 @Keep
 enum class Status {
     SUCCESS,
-    PENDING,
-    CONTINUE,
+//    PENDING,
+//    CONTINUE,
     ERROR
 }
 

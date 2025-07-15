@@ -1,7 +1,6 @@
 package com.example.voote.wallet
 
 import android.content.Context
-import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
 import java.io.File
 import com.example.voote.model.data.WalletData
@@ -78,16 +77,16 @@ class WalletManager(context: Context) {
         return walletData
     }
 
-    /**
-     * Load an existing wallet for the user
-     * @param password - Used to encrypt the wallet
-     * @param mnemonic - The wallet's mnemonic
-     * @return - Wallet credentials
-     */
-
-    fun loadCredentials(password: String = generalPassword, mnemonic: String): Credentials {
-        return WalletUtils.loadBip39Credentials(password, mnemonic)
-    }
+//    /**
+//     * Load an existing wallet for the user
+//     * @param password - Used to encrypt the wallet
+//     * @param mnemonic - The wallet's mnemonic
+//     * @return - Wallet credentials
+//     */
+//
+//    fun loadCredentials(password: String = generalPassword, mnemonic: String): Credentials {
+//        return WalletUtils.loadBip39Credentials(password, mnemonic)
+//    }
 
     /**
      * Save wallet data to a file

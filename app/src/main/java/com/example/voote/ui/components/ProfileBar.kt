@@ -21,9 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import coil.compose.AsyncImage
-import com.example.voote.utils.Constants
 
 @Composable
 fun ProfileBar( name: String, userName: String, imageVector: ImageVector? = Icons.Outlined.Notifications, onClick: () -> Unit = {}) {
@@ -58,17 +56,17 @@ fun ProfileBar( name: String, userName: String, imageVector: ImageVector? = Icon
     }
 }
 
-@Composable
-fun ProfileImage(
-    userImageUri: Uri?
-) {
-    AsyncImage(
-        model = userImageUri,
-        contentDescription = "User Image",
-        modifier = Modifier.size(48.dp).clip(CircleShape),
-        contentScale = ContentScale.Crop
-    )
-}
+//@Composable
+//fun ProfileImage(
+//    userImageUri: Uri?
+//) {
+//    AsyncImage(
+//        model = userImageUri,
+//        contentDescription = "User Image",
+//        modifier = Modifier.size(48.dp).clip(CircleShape),
+//        contentScale = ContentScale.Crop
+//    )
+//}
 
 @Composable
 fun ProfileWithInitials(name: String) {

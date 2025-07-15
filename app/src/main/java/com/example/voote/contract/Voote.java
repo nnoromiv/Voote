@@ -45,7 +45,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * <a href="https://github.com/LFDT-web3j/web3j/tree/main/codegen">codegen module</a> to update.
  *
  * <p>Generated with web3j version 1.7.0.
- * @noinspection deprecation, DeprecatedIsStillUsed
+ * @noinspection deprecation
  */
 
 @SuppressWarnings({"unused", "rawtypes"})

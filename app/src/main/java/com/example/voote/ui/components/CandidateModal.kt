@@ -61,7 +61,7 @@ fun CandidateModal(election: ElectionData?, authManager: AuthViewModel, walletVi
     val gasData = remember { mutableStateOf(VotePreview(null, null, null)) }
     val context = LocalContext.current
 
-    val electionId = election?.electionId?.toInt() ?: 0
+    val electionId = election?.electionId ?: 0
     val registeredAddresses = election?.registeredAddresses ?: emptyList()
 
     val coroutineScope = (context.applicationContext as ThisApplication).appScope
