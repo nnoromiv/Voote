@@ -1,14 +1,11 @@
 package com.example.voote.viewModel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.voote.firebase.user.User
 import com.example.voote.model.data.KycData
 import com.example.voote.utils.helpers.convertLongToDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class KycViewModel : ViewModel() {
     private val _kycCompletionPercentage = MutableStateFlow(0)
@@ -61,14 +58,11 @@ class KycViewModel : ViewModel() {
     }
 
     private val _kycData = MutableStateFlow<KycData?>(null)
-    val kycData: MutableStateFlow<KycData?> = _kycData
+    val kycData: StateFlow<KycData?> = _kycData
 
-    fun fetchKycData() {
-        viewModelScope.launch {
-            val user = User().getKycData()
-            _kycData.value = user
-            setKycCompletionPercentage(user?.calculateEmptinessPercentage() ?: 0)
-        }
+    fun setKycData(kycData: KycData?) {
+        _kycData.value = kycData
+        setKycCompletionPercentage(_kycData.value?.calculateEmptinessPercentage() ?: 0)
     }
 
     fun cleanKycData() {

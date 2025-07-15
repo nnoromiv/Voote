@@ -27,10 +27,7 @@ import coil.compose.AsyncImage
 import com.example.voote.utils.Constants
 
 @Composable
-fun FaceCircle(
-    onClick: () -> Unit,
-    userImageUri: String
-) {
+fun FaceCircle( onClick: () -> Unit, userImageUri: String) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -39,7 +36,7 @@ fun FaceCircle(
     ) {
         Box(
             modifier = Modifier
-                .size(350.dp)
+                .size(250.dp)
                 .clip(CircleShape)
                 .background(Color(0x401B1B1B)) // dark circular background
                 .clickable(onClick = onClick),
@@ -62,7 +59,7 @@ fun FaceCircle(
         }
 
         Text(
-            text = "Tap to capture a picture of your face",
+            text = "Place face within circle then tap continue",
             color = Color.Gray,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,

@@ -2,183 +2,140 @@ package com.example.voote.firebase.auth
 
 import android.net.Uri
 import android.util.Log
+import com.example.voote.firebase.data.AppResult
+import com.example.voote.model.data.WalletIdData
+import com.example.voote.utils.helpers.generateHMAC
+import com.example.voote.utils.helpers.getOrCreateHMACKey
+import com.example.voote.utils.helpers.verifyHMAC
 import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.WalletViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
-class Verification {
+class Verification(authManager: AuthViewModel) {
+
     val db = Firebase.firestore
     val storageRef = FirebaseStorage.getInstance().reference
 
-    val authViewModel = AuthViewModel()
-    val uid = authViewModel.userUid().toString()
+    val uid = authManager.userUid().toString()
     val userRef = db.collection("users").document(uid)
+    private fun kycRef(walletId: String) = userRef.collection("kyc").document(walletId)
 
-    private val tag = "Verification"
+    suspend fun checkOrSaveWalletId(walletId: String?, walletViewModel: WalletViewModel) : AppResult<WalletIdData> {
 
-    fun saveWalletToDocument(walletId: String, onContinue: (String) -> Unit) {
-        userRef.get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val existingWalletId = document.getString("walletId")
-                    if (existingWalletId.isNullOrBlank()) {
-                        // walletId not set, so update it
-                        userRef.update("walletId", walletId)
-                            .addOnSuccessListener {
-                                beginVerification(walletId)
-                                Log.d(tag, "Wallet ID updated successfully")
-                                onContinue(walletId)
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e(tag, "Error updating wallet ID", e)
-                                onContinue(walletId) // still return new walletId on failure
-                            }
-                    } else {
-                        // walletId already set, just continue without update
-                        Log.d(tag, "Wallet ID already set, skipping update")
-                        onContinue(existingWalletId)
-                    }
-                } else {
-                    Log.e(tag, "User document does not exist")
-                    onContinue(walletId) // fallback: pass new walletId
-                }
+        val walletData = walletViewModel.walletData.value ?: return AppResult.Error("No wallet loaded")
+        val address = walletData.address
+        val key = getOrCreateHMACKey()
+
+        return try {
+            val computedId = generateHMAC(uid + address, key)
+            if(walletId.isNullOrEmpty()) {
+                createKycDocument(computedId)
+                userRef.update("walletId", computedId).await()
+                return AppResult.Success("Wallet ID saved",  WalletIdData(computedId))
             }
-            .addOnFailureListener { e ->
-                Log.e(tag, "Error fetching user document", e)
-                onContinue(walletId) // fallback: pass new walletId
+
+            return if (!verifyHMAC(uid + address, walletId, key)) {
+                renameDocument(walletId, computedId)
+                AppResult.Success("Wallet ID renamed", WalletIdData(computedId))
+            } else {
+                AppResult.Success("Wallet still valid", WalletIdData(walletId))
             }
-    }
-
-    fun beginVerification(walletId: String) {
-        val kycRef = userRef.collection("kyc").document(walletId)
-
-        kycRef.get()
-            .addOnSuccessListener { document ->
-                if (!document.exists()) {
-                    val kycMap = hashMapOf(
-                        "passportNumber" to "",
-                        "passportExpiryDate" to "",
-                        "passportImage" to "",
-                        "driverLicenceNumber" to "",
-                        "driverLicenceExpiryDate" to "",
-                        "driverLicenceImage" to "",
-                        "residentialAddress" to "",
-                        "faceImage" to "",
-                        "lastUpdated" to System.currentTimeMillis()
-                    )
-
-                    kycRef.set(kycMap)
-                        .addOnSuccessListener {
-                            Log.d(tag, "Firestore write successful")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e(tag, "Firestore write failed", e)
-                        }
-                } else {
-                    Log.d(tag, "KYC document already exists - skipping write")
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e(tag, "Error checking KYC document existence", e)
-            }
-    }
-
-    fun uploadImage(imageUri: Uri, fileName: String, imageToSave: String, onError: (Exception) -> Unit) {
-        val imageRef = storageRef.child("images/$uid/$fileName.jpg")
-
-        val uploadTask = imageRef.putFile(imageUri)
-
-        uploadTask.addOnSuccessListener {
-            imageRef.downloadUrl.addOnSuccessListener { uri ->
-                saveImageToDB(uri, imageToSave)
-            }
-        }.addOnFailureListener { exception ->
-            onError(exception)
+        } catch (e: Exception) {
+            Log.e("WalletID", "Error saving/checking wallet ID", e)
+            AppResult.Error("Exception: ${e.localizedMessage}")
         }
-
     }
 
-    fun saveImageToDB(imageUri: Uri, imageToSave: String) {
-        userRef.get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val walletId = document.getString("walletId")
-                    if (walletId != null) {
-                        val kycRef = userRef.collection("kyc").document(walletId)
-                        kycRef.update(
-                            imageToSave, imageUri.toString(),
-                            )
-                            .addOnSuccessListener {
-                                Log.d(tag, "Image URL updated successfully")
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e(tag, "Error updating image URL", e)
-                            }
-                    }
-                } else {
-                    Log.d("Firestore", "Document does not exist")
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error getting document", e)
-            }
+    suspend fun createKycDocument(walletId: String) {
+        try {
+            val ref = kycRef(walletId)
+            val hasRef = ref.get().await()
 
+            if (hasRef.exists()) return
+
+            val kycMap = hashMapOf(
+                "passportNumber" to "",
+                "passportExpiryDate" to "",
+                "passportImage" to "",
+                "driverLicenceNumber" to "",
+                "driverLicenceExpiryDate" to "",
+                "driverLicenceImage" to "",
+                "residentialAddress" to "",
+                "faceImage" to "",
+                "lastUpdated" to System.currentTimeMillis()
+            )
+
+            ref.set(kycMap).await()
+        } catch (e: Exception) {
+            Log.e("KYC", "Failed to create KYC document", e)
+            throw e
+        }
     }
 
-    fun saveDocumentNumbersToDB(passportNumber: String?, passportExpiryDate: String?, driverLicenceNumber: String?, driverLicenceExpiryDate: String?, onSuccess: () -> Unit ) {
+    suspend fun uploadImage(imageUri: Uri, fileName: String): AppResult<Any> {
+        return try {
+            val imageRef = storageRef.child("images/$uid/$fileName.jpg")
 
-        userRef.get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val walletId = document.getString("walletId")
-                    if (walletId != null) {
-                        val kycRef = userRef.collection("kyc").document(walletId)
+            // Upload file
+            imageRef.putFile(imageUri).await()
 
-                        // Build a map of non-null and non-blank fields to update
-                        val updates = mutableMapOf<String, Any>()
-                        if (!passportNumber.isNullOrBlank()) {
-                            updates["passportNumber"] = passportNumber
-                        }
-                        if (!passportExpiryDate.isNullOrBlank()) {
-                            updates["passportExpiryDate"] = passportExpiryDate
-                        }
-                        if (!driverLicenceNumber.isNullOrBlank()) {
-                            updates["driverLicenceNumber"] = driverLicenceNumber
-                        }
-                        if (!driverLicenceExpiryDate.isNullOrBlank()) {
-                            updates["driverLicenceExpiryDate"] = driverLicenceExpiryDate
-                        }
+            // Get download URL
+            val downloadUrl = imageRef.downloadUrl.await()
 
-                        // Only update if there's at least one valid field
-                        if (updates.isNotEmpty()) {
-                            kycRef.update(updates)
-                                .addOnSuccessListener {
-                                    onSuccess()
-                                    Log.d(tag, "KYC fields updated successfully")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e(tag, "Error updating KYC fields", e)
-                                }
-                        } else {
-                            Log.d(tag, "No valid KYC data to update")
-                        }
-                    } else {
-                        Log.e(tag, "walletId is null")
-                    }
-                } else {
-                    Log.d(tag, "User document does not exist")
-                }
+            val ref = userRef.get().await()
+
+            if(!ref.exists()) {
+                return AppResult.Error("User does not exist")
             }
-            .addOnFailureListener { e ->
-                Log.e(tag, "Error fetching user document", e)
+
+            val existingWalletId = ref.getString("walletId")
+
+            if(existingWalletId.isNullOrBlank()) {
+                return AppResult.Error("Wallet ID does not exist")
             }
+
+                // Save URL to Firestore
+            val kycRef = kycRef(existingWalletId)
+            kycRef.update(fileName, downloadUrl.toString()).await()
+
+            AppResult.Success("Image uploaded successfully")
+        } catch (e: Exception) {
+            Log.e("UploadImage", "Error uploading image", e)
+            AppResult.Error("Failed to upload image: ${e.localizedMessage}")
+        }
+    }
+
+    suspend fun saveDocumentNumbers(passportNumber: String?, passportExpiryDate: String?, driverLicenceNumber: String?, driverLicenceExpiryDate: String?) : AppResult<Any> {
+        return try {
+            val hasRef = userRef.get().await()
+            if (!hasRef.exists()) return AppResult.Error("User does not exist")
+
+            val walletId = hasRef.getString("walletId")
+            if (walletId.isNullOrBlank()) return AppResult.Error("Wallet ID does not exist")
+
+            val kycRef = kycRef(walletId)
+            val updates = mutableMapOf<String, Any>()
+            passportNumber?.takeIf { it.isNotBlank() }?.let { updates["passportNumber"] = it }
+            passportExpiryDate?.takeIf { it.isNotBlank() }?.let { updates["passportExpiryDate"] = it }
+            driverLicenceNumber?.takeIf { it.isNotBlank() }?.let { updates["driverLicenceNumber"] = it }
+            driverLicenceExpiryDate?.takeIf { it.isNotBlank() }?.let { updates["driverLicenceExpiryDate"] = it }
+
+            if (updates.isEmpty()) return AppResult.Error("No valid fields to update")
+
+            kycRef.update(updates).await()
+            AppResult.Success("Document numbers saved")
+        } catch (e: Exception) {
+            Log.e("SaveDocNumber", "Failed to update document numbers", e)
+            AppResult.Error("Failed to update documents: ${e.localizedMessage}")
+        }
     }
 
     suspend fun renameDocument( oldDocId: String, newDocId: String ) {
-        val oldDocRef = userRef.collection("kyc").document(oldDocId)
-        val newDocRef = userRef.collection("kyc").document(newDocId)
+        val oldDocRef = kycRef(oldDocId)
+        val newDocRef = kycRef(newDocId)
 
         try {
             val documentSnapshot = oldDocRef.get().await()
@@ -189,14 +146,11 @@ class Verification {
             val data = documentSnapshot.data
                 ?: throw Exception("Old document has no data")
 
-            // Copy data to new document
-            newDocRef.set(data).await()
-
-            // Delete old document
-            oldDocRef.delete().await()
-
-            // Update walletId field in user document
-            userRef.update("walletId", newDocId).await()
+            db.runBatch { batch ->
+                batch.set(newDocRef, data)
+                batch.delete(oldDocRef)
+                batch.update(userRef, "walletId", newDocId)
+            }.await()
 
             Log.d("Firestore", "Document renamed and walletId updated successfully")
         } catch (e: Exception) {
@@ -205,18 +159,15 @@ class Verification {
         }
     }
 
-    suspend fun setResidentialAddress(residentialAddress: String, walletId: String): Boolean {
-        val kycRef = userRef.collection("kyc").document(walletId)
+    suspend fun setResidentialAddress(address: String, walletId: String): AppResult<Any> {
         return try {
-            kycRef.update("residentialAddress", residentialAddress).await()
-            true
+            kycRef(walletId)
+                .update("residentialAddress", address).await()
+            AppResult.Success("Residential address updated")
         } catch (e: Exception) {
-            Log.e("Firestore", "Failed to update residential address", e)
-            false
+            Log.e("Firestore", "Failed to update address", e)
+            AppResult.Error("Failed to update address: ${e.localizedMessage}")
         }
     }
-
-
-
 
 }

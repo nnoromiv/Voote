@@ -14,20 +14,38 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateInputField(onDateSelected: (Long) -> Unit, label: String, date: String ) {
+    val today = remember { LocalDate.now() }
+
+    val selectableDates = object : SelectableDates {
+        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+            val selectedDate = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+            return selectedDate.isAfter(today)
+        }
+    }
+
+    val state = rememberDatePickerState(
+        initialSelectedDateMillis = Instant.now().plus(1, ChronoUnit.DAYS).toEpochMilli(),
+        selectableDates = selectableDates
+    )
 
     val showDialog = remember { mutableStateOf(false) }
-    val state = rememberDatePickerState()
 
     if(showDialog.value) {
         DatePickerDialog (
@@ -76,7 +94,10 @@ fun DateInputField(onDateSelected: (Long) -> Unit, label: String, date: String )
         }
     }
 
-    Row {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
             modifier = Modifier.weight(1f)
         ) {

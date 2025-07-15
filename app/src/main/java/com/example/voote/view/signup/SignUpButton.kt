@@ -1,6 +1,7 @@
 package com.example.voote.view.signup
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,18 +24,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.R
 import com.example.voote.firebase.auth.Auth
-import com.example.voote.navigation.Login
+import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.user.User
+import com.example.voote.navigation.RouteLogin
+import com.example.voote.navigation.RouteTokenVerification
 import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
-import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.SignUpViewModel
+import com.example.voote.viewModel.UserViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpButton(activity: Activity, navController: NavController) {
-    val authViewModel: AuthViewModel = viewModel()
-    val auth = authViewModel.auth
+fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+
+    val auth = Auth()
+    val coroutineScope = rememberCoroutineScope()
 
     val signUpViewModel : SignUpViewModel = viewModel()
     val email by signUpViewModel.email.collectAsState()
@@ -49,10 +57,63 @@ fun SignUpButton(activity: Activity, navController: NavController) {
     val errorExist = firstName.isEmpty() || lastName.isEmpty() || password.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || isEmailError || isPhoneNumberError || emailErrorMessage.isNotEmpty() || phoneNumberErrorMessage.isNotEmpty()
     var isLoading by remember { mutableStateOf(false) }
 
+    fun handleSignUp() {
+
+        isLoading = true
+
+        if(password.length < 6) {
+            Toast.makeText(activity, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+            isLoading = false
+            return
+        }
+
+        coroutineScope.launch {
+            val result = auth.signUp(email, firstName, lastName, phoneNumber, password)
+
+            if(result.status == Status.ERROR) {
+                Toast.makeText(activity, result.message, Toast.LENGTH_SHORT).show()
+                isLoading = false
+                return@launch
+            }
+
+
+            val data = result.data?.user
+
+            if(data == null) {
+                Toast.makeText(activity, "Error Signing Up", Toast.LENGTH_SHORT).show()
+                isLoading = false
+                return@launch
+
+            }
+
+            val uid = data.uid
+            val getData = User(uid)
+
+            val user = getData.getUser()
+            val kyc = getData.getKycData()
+
+            if(user == null) {
+                Log.d("SignUp", "Error getting user")
+                isLoading = false
+                return@launch
+            }
+
+            userViewModel.setUserData(user)
+            kycViewModel.setKycData(kyc)
+            Auth()
+
+            isLoading = false
+
+            navController.navigate(RouteTokenVerification(
+                phoneNumber = phoneNumber,
+            ))
+        }
+
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AgreementText()
 
         if(isLoading) {
             Row(
@@ -64,40 +125,11 @@ fun SignUpButton(activity: Activity, navController: NavController) {
         } else {
             PrimaryButton(
                 text = stringResource(R.string.sign_up),
-                onClick = {
-                    isLoading = true
-
-                    if(password.length < 6) {
-                        Toast.makeText(activity, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                        isLoading = false
-                        return@PrimaryButton
-                    }
-
-                    try {
-
-                        Auth().handleSignUp(
-                            activity,
-                            auth,
-                            email,
-                            firstName,
-                            lastName,
-                            phoneNumber,
-                            password,
-                            navController
-                        )
-                        isLoading = false
-                    } catch (e: Exception) {
-                        isLoading = false
-                        Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
-                    }
-
-                },
+                onClick = { handleSignUp() },
                 enabled = !errorExist,
                 modifier = Modifier.padding(vertical = 20.dp)
             )
         }
-
-
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -111,51 +143,8 @@ fun SignUpButton(activity: Activity, navController: NavController) {
             )
             CTextButton(
                 text = "Log In",
-                onClick = {
-                    navController.navigate(Login)
-                }
+                onClick = { navController.navigate(RouteLogin) }
             )
         }
     }
 }
-
-@Composable
-fun AgreementText() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(0.dp)
-        ) {
-            Text(
-                text = "By signing up, you agree to our",
-                softWrap = true,
-                fontSize = 16,
-                fontWeight = FontWeight.Normal
-            )
-            CTextButton(text = "Terms,", onClick = {}, fonSize = 16)
-
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(0.dp)
-        ) {
-            Text(
-            text = "Privacy Policy",
-            softWrap = true,
-            fontSize = 16,
-            fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = " and ",
-                fontSize = 16,
-                fontWeight = FontWeight.Normal
-            )
-            CTextButton(text = "Cookies.", onClick = {}, fonSize = 16)
-        }
-    }
-}
-

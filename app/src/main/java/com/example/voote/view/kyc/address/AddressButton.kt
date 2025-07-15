@@ -1,6 +1,5 @@
 package com.example.voote.view.kyc.address
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -17,23 +16,27 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.navigation.FaceVerification
-import com.example.voote.navigation.homeObject
+import com.example.voote.firebase.data.Status
+import com.example.voote.navigation.RouteFaceVerification
+import com.example.voote.navigation.RouteHome
+import com.example.voote.navigation.RouteStatus
+import com.example.voote.navigation.toJson
 import com.example.voote.ui.components.COutlinedButton
 import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.viewModel.AddressViewModel
+import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.UserViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddressButton(navController: NavController, userViewModel: UserViewModel, kycViewModel: KycViewModel) {
+fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val isLoading = remember { mutableStateOf(false) }
+    val verification = Verification(authManager)
 
     val addressViewModel : AddressViewModel = viewModel()
     val country by addressViewModel.country.collectAsState()
@@ -48,9 +51,10 @@ fun AddressButton(navController: NavController, userViewModel: UserViewModel, ky
 
     val errorExist = country.isEmpty() || state.isEmpty() || city.isEmpty() || street.isEmpty() || postCode.isEmpty()
 
-    val residentialAddress = "$postCode, $street, $city, $state, $country"
 
     fun handleSaveAddress() {
+        val residentialAddress = "$postCode, $street, $city, $state, $country"
+
         isLoading.value = true
 
         if(residentialAddress.isEmpty()) {
@@ -58,23 +62,31 @@ fun AddressButton(navController: NavController, userViewModel: UserViewModel, ky
             return
         }
 
-        coroutineScope.launch {
-            Log.d("AddressButton", "walletId: $walletId")
+        if(walletId.isEmpty()) {
+            Toast.makeText(context, "Error saving address", Toast.LENGTH_SHORT).show()
+            isLoading.value = false
+            return
+        }
 
-            if(walletId.isEmpty()) {
-                Toast.makeText(context, "Error saving address", Toast.LENGTH_SHORT).show()
+        coroutineScope.launch {
+
+            val success = verification.setResidentialAddress(residentialAddress, walletId)
+
+            if(success.status == Status.ERROR) {
+                navController.navigate(RouteStatus(
+                    status = Status.ERROR,
+                    nextScreen = ""
+                ))
+
                 isLoading.value = false
                 return@launch
             }
-            val success = Verification().setResidentialAddress(residentialAddress, walletId)
-            if(success) {
-                navController.navigate(FaceVerification(
-                    userImageUri = ""
-                ))
-            } else {
-                delay(2000)
-                isLoading.value = false
-            }
+
+            navController.navigate(RouteStatus(
+                status = Status.SUCCESS,
+                nextScreen = RouteFaceVerification("").toJson()
+            ))
+
         }
     }
 
@@ -90,7 +102,7 @@ fun AddressButton(navController: NavController, userViewModel: UserViewModel, ky
                 COutlinedButton(
                     text = "Continue",
                     onClick = {
-                        navController.navigate(FaceVerification(
+                        navController.navigate(RouteFaceVerification(
                             userImageUri = ""
                         ))
                     },
@@ -110,7 +122,7 @@ fun AddressButton(navController: NavController, userViewModel: UserViewModel, ky
                 COutlinedButton(
                     text = "Do this later",
                     onClick = {
-                        navController.navigate(homeObject)
+                        navController.navigate(RouteHome)
                     },
                     enabled = !isLoading.value,
                     modifier = Modifier.padding(vertical = 10.dp)

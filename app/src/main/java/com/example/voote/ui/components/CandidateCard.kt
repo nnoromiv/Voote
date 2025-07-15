@@ -1,6 +1,5 @@
 package com.example.voote.ui.components
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,14 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 
 @Composable
-fun CandidateCard(
-    candidateImageUri: Uri?,
-    candidateName: String,
-    onClick: () -> Unit
-) {
+fun CandidateCard(candidateImageUri: String?, candidateName: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -38,7 +34,7 @@ fun CandidateCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AsyncImage(
-                model = candidateImageUri,
+                model = candidateImageUri?.toUri(),
                 contentDescription = "User Image",
                 modifier = Modifier.fillMaxWidth().height(120.dp),
                 contentScale = ContentScale.Crop

@@ -97,6 +97,7 @@ fun AddressForm() {
                             object : Geocoder.GeocodeListener {
                                 override fun onGeocode(addresses: MutableList<Address>) {
                                     handleAddressResult(addresses)
+                                    isLoading = false
                                 }
 
                                 override fun onError(errorMessage: String?) {
@@ -110,6 +111,7 @@ fun AddressForm() {
                     val addresses = geocoder.getFromLocation(lat, long, 1)
                     withContext(Dispatchers.Main) {
                         handleAddressResult(addresses)
+                        isLoading = false
                     }
                 }
             } catch (e: Exception) {

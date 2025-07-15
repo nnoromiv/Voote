@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.voote.firebase.data.AppResult
 import com.example.voote.utils.FaceAnalyser
 import com.example.voote.utils.helpers.RequestCameraPermission
 import com.example.voote.utils.helpers.saveBitmapToFile
@@ -43,13 +44,8 @@ fun ScanFace(navController: NavController){
     )
 }
 
-fun faceCapture(
-    imageCapture: ImageCapture,
-    executor: Executor,
-    analyser: FaceAnalyser,
-    context: Context,
-    onImageSaved: (Uri?) -> Unit = {}
-) {
+fun faceCapture(imageCapture: ImageCapture, executor: Executor, analyser: FaceAnalyser, context: Context, onImageSaved: (Uri?) -> Unit = {}) {
+
     imageCapture.takePicture(
         executor,
         object : ImageCapture.OnImageCapturedCallback() {
@@ -80,7 +76,14 @@ fun faceCapture(
                 )
 
                 val savedImageUri = saveBitmapToFile(bitmap, context, cropRect, "face_${System.currentTimeMillis()}.jpg")
-                onImageSaved(savedImageUri)
+
+                if(savedImageUri is AppResult.Error){
+                    Log.e("ImageCapture", "Error saving image: ${savedImageUri.message}")
+                    onImageSaved(null)
+                    return
+                }
+
+                onImageSaved(savedImageUri.data)
 
                 image.close()
             }

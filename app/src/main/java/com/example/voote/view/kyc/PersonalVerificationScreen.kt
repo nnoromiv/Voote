@@ -1,49 +1,57 @@
 package com.example.voote.view.kyc
 
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.voote.firebase.auth.Verification
-import com.example.voote.navigation.Login
-import com.example.voote.navigation.PassportVerification
-import com.example.voote.navigation.homeObject
-import com.example.voote.ui.components.COutlinedButton
-import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Logo
-import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
-import com.example.voote.utils.helpers.generateHMAC
-import com.example.voote.utils.helpers.getOrCreateHMACKey
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.UserViewModel
-import com.example.voote.viewModel.WalletViewModel
-import com.example.voote.wallet.WalletManager
-import com.google.firebase.auth.FirebaseUser
-import java.io.File
 import androidx.compose.runtime.getValue
+import com.example.voote.firebase.auth.Verification
+import com.example.voote.firebase.data.Status
+import com.example.voote.navigation.RouteSignup
+import com.example.voote.viewModel.WalletViewModel
+
 
 @Composable
-fun PersonalVerificationScreen(navController: NavController, authViewModel: AuthViewModel, userViewModel: UserViewModel) {
+fun PersonalVerificationScreen(authViewModel: AuthViewModel, userViewModel: UserViewModel, walletViewModel: WalletViewModel, navController: NavController) {
 
     val context = LocalContext.current
+    val userData by userViewModel.userData.collectAsState()
+    val verification = Verification(authViewModel)
+
+    LaunchedEffect(Unit) {
+        if (userData == null) {
+            navController.navigate(RouteSignup)
+        }
+
+        val walletId = userData?.walletId
+
+        val result = verification.checkOrSaveWalletId(walletId, walletViewModel)
+
+        if(result.status == Status.ERROR){
+            Log.e("PersonalVerification", "Error checking or saving wallet ID", Exception(result.message))
+            return@LaunchedEffect
+        }
+
+        Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+    }
 
     Scaffold {
             innerPadding ->
@@ -91,7 +99,6 @@ fun PersonalVerificationScreen(navController: NavController, authViewModel: Auth
                 PersonalVerificationButton(
                     context,
                     authViewModel,
-                    userViewModel,
                     navController
                 )
             }

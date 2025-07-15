@@ -1,5 +1,6 @@
 package com.example.voote.navigation
 
+import com.example.voote.firebase.data.Status
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -12,89 +13,124 @@ import kotlinx.serialization.modules.polymorphic
 sealed interface AppRoute
 
 @Serializable
-object Main
+@SerialName("RouteMain")
+object RouteMain : AppRoute
 
 @Serializable
-object Login
+@SerialName("RouteLogin")
+object RouteLogin : AppRoute
 
 @Serializable
-object Signup
+@SerialName("RouteSignUp")
+object RouteSignup : AppRoute
 
 @Serializable
-object TokenVerification
+@SerialName("RouteTokenVerification")
+data class RouteTokenVerification(
+    val phoneNumber: String
+) : AppRoute
 
 @Serializable
-object PersonalVerification
+@SerialName("RoutePersonalVerification")
+object RoutePersonalVerification : AppRoute
 
 @Serializable
-object PassportVerification
+@SerialName("RoutePassportVerification")
+object RoutePassportVerification : AppRoute
 
 @Serializable
-object DriverLicenceVerification
+@SerialName("RouteDriverLicenceVerification")
+object RouteDriverLicenceVerification : AppRoute
 
 @Serializable
-object AddressVerification
+@SerialName("RouteAddressVerification")
+object RouteAddressVerification : AppRoute
 
 @Serializable
-data class FaceVerification(
+@SerialName("RouteFaceVerification")
+data class RouteFaceVerification(
     val userImageUri: String
-)
+) : AppRoute
 
 @Serializable
-@SerialName("Home")
-data object Home : AppRoute
+@SerialName("RouteHome")
+data object RouteHome : AppRoute
 
 @Serializable
-@SerialName("Elections")
-data object Elections : AppRoute
+@SerialName("RouteElections")
+data object RouteElections : AppRoute
 
 @Serializable
-@SerialName("Scan")
-data object Scan : AppRoute
+@SerialName("RouteScan")
+data object RouteScan : AppRoute
 
 @Serializable
-@SerialName("History")
-data object History : AppRoute
+@SerialName("RouteHistory")
+data object RouteHistory : AppRoute
 
 @Serializable
-@SerialName("Profile")
-data object Profile : AppRoute
+@SerialName("RouteProfile")
+data object RouteProfile : AppRoute
 
 @Serializable
-object DynamicElectionScreen
+@SerialName("RouteDynamicElection")
+data class RouteDynamicElection(
+    val id: String
+) : AppRoute
 
 @Serializable
-data class ScanID(
+@SerialName("RouteScanID")
+data class RouteScanID(
     val documentType: String
-)
+) : AppRoute
 
 @Serializable
-object ScanFace
+@SerialName("RouteScanFace")
+object RouteScanFace : AppRoute
+
+@Serializable
+@SerialName("RouteStatus")
+data class RouteStatus (
+    val status: Status,
+    val nextScreen: String? = ""
+) : AppRoute
+
+@Serializable
+@SerialName("RouteLoader")
+data object RouteLoader : AppRoute
+
+@Serializable
+@SerialName("RouteImportWallet")
+data object RouteImportWallet : AppRoute
 
 val json = Json {
+    classDiscriminator = "type"
     serializersModule = SerializersModule {
         polymorphic(AppRoute::class) {
-            subclass(Home::class, Home.serializer())
-            subclass(Elections::class, Elections.serializer())
-            subclass(History::class, History.serializer())
-            subclass(Scan::class, Scan.serializer())
-            subclass(Profile::class, Profile.serializer())
+            subclass(RouteMain::class, RouteMain.serializer())
+            subclass(RouteLogin::class, RouteLogin.serializer())
+            subclass(RouteSignup::class, RouteSignup.serializer())
+            subclass(RouteTokenVerification::class, RouteTokenVerification.serializer())
+            subclass(RoutePersonalVerification::class, RoutePersonalVerification.serializer())
+            subclass(RoutePassportVerification::class, RoutePassportVerification.serializer())
+            subclass(RouteDriverLicenceVerification::class, RouteDriverLicenceVerification.serializer())
+            subclass(RouteAddressVerification::class, RouteAddressVerification.serializer())
+            subclass(RouteFaceVerification::class, RouteFaceVerification.serializer())
+            subclass(RouteHome::class, RouteHome.serializer())
+            subclass(RouteElections::class, RouteElections.serializer())
+            subclass(RouteScan::class, RouteScan.serializer())
+            subclass(RouteHistory::class, RouteHistory.serializer())
+            subclass(RouteProfile::class, RouteProfile.serializer())
+            subclass(RouteDynamicElection::class, RouteDynamicElection.serializer())
+            subclass(RouteScanID::class, RouteScanID.serializer())
+            subclass(RouteScanFace::class, RouteScanFace.serializer())
+            subclass(RouteStatus::class, RouteStatus.serializer())
+            subclass(RouteLoader::class, RouteLoader.serializer())
+            subclass(RouteImportWallet::class, RouteImportWallet.serializer())
         }
     }
-    classDiscriminator = "type"
 }
 
-val homeString = json.encodeToString(AppRoute.serializer(), Home) // ✅ SERIALIZE
-val homeObject = json.decodeFromString(AppRoute.serializer(), homeString) // ✅ DESERIALIZE
+fun AppRoute.toJson(): String = json.encodeToString(AppRoute.serializer(), this)
+fun String.toAppRoute(): AppRoute = json.decodeFromString(AppRoute.serializer(), this)
 
-val profileString = json.encodeToString(AppRoute.serializer(), Profile) // ✅ SERIALIZE
-val profileObject = json.decodeFromString(AppRoute.serializer(), profileString) // ✅ DESERIALIZE
-
-val scanString = json.encodeToString(AppRoute.serializer(), Scan) // ✅ SERIALIZE
-val scanObject = json.decodeFromString(AppRoute.serializer(), scanString) // ✅ DESERIALIZE
-
-val historyString = json.encodeToString(AppRoute.serializer(), History) // ✅ SERIALIZE
-val historyObject = json.decodeFromString(AppRoute.serializer(), historyString) // ✅ DESERIALIZE
-
-val electionsString = json.encodeToString(AppRoute.serializer(), Elections) // ✅ SERIALIZE
-val electionsObject = json.decodeFromString(AppRoute.serializer(), electionsString) // ✅ DESERIALIZE

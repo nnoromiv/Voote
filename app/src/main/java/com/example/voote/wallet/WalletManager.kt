@@ -29,7 +29,7 @@ class WalletManager(context: Context) {
      * @return - Pair of wallet address and mnemonic
      */
 
-    fun createWallet(password: String = generalPassword): Pair<String, String> {
+    fun createWallet(password: String = generalPassword): WalletData? {
         val wallet = WalletUtils.generateBip39Wallet(password, File(walletDirectoryPath))
         val credentials = WalletUtils.loadBip39Credentials(password, wallet.mnemonic)
 
@@ -46,9 +46,9 @@ class WalletManager(context: Context) {
         // Rename or move the file to your custom name (overwrite if exists)
         if (walletFile.exists()) walletFile.delete()
 
-        saveWalletData(walletFile, address, mnemonic, privateKey)
+        val walletData = saveWalletData(walletFile, address, mnemonic, privateKey)
 
-        return Pair(address, mnemonic)
+        return walletData
     }
 
     /**
@@ -58,10 +58,24 @@ class WalletManager(context: Context) {
      * @return - Wallet address
      */
 
-    fun importWallet(mnemonic: String, password: String = generalPassword): String {
+    fun importWallet(mnemonic: String, password: String = generalPassword): WalletData? {
         val credentials = WalletUtils.loadBip39Credentials(password, mnemonic)
-        WalletUtils.generateBip39WalletFromMnemonic(password, mnemonic, File(walletDirectoryPath))
-        return credentials.address
+        val wallet =WalletUtils.generateBip39WalletFromMnemonic(password, mnemonic, File(walletDirectoryPath))
+
+        val address = credentials.address
+        val privateKey = credentials.ecKeyPair.privateKey.toString(16)
+
+        // Original generated wallet file path
+        val originalFile = File(walletDirectoryPath, wallet.filename)
+        if(originalFile.exists()) originalFile.delete()
+        // Your desired wallet file name
+        val walletFile = File(walletDirectoryPath, walletFileName)
+
+        // Rename or move the file to your custom name (overwrite if exists)
+        if (walletFile.exists()) walletFile.delete()
+
+        val walletData = saveWalletData(walletFile, address, mnemonic, privateKey)
+        return walletData
     }
 
     /**
@@ -84,7 +98,7 @@ class WalletManager(context: Context) {
      * @return - Unit
      */
 
-    fun saveWalletData(file: File, address: String, mnemonic: String, privateKey: String) {
+    fun saveWalletData(file: File, address: String, mnemonic: String, privateKey: String) : WalletData? {
         val walletData = WalletData(
             address = address,
             mnemonic = encryptWithKeyStore(mnemonic),
@@ -95,6 +109,7 @@ class WalletManager(context: Context) {
         val jsonString = gson.toJson(walletData)
 
         file.writeText(jsonString)
+        return walletData
     }
 
     /**
@@ -104,7 +119,7 @@ class WalletManager(context: Context) {
      */
 
     fun getWalletContent(walletFileName: String): WalletData? {
-        var walletData : WalletData? = null
+        var walletData : WalletData?
 
         val walletFile = File(walletDirectoryPath, walletFileName)
         if (walletFile.exists()) {

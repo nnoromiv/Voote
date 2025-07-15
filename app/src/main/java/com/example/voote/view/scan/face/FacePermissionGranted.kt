@@ -16,20 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import com.example.voote.navigation.FaceVerification
+import com.example.voote.navigation.RouteFaceVerification
 import com.example.voote.utils.FaceAnalyser
 import com.example.voote.view.scan.faceCapture
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
-fun FacePermissionGranted(
-    navController: NavController,
-    context: Context,
-    analyser: FaceAnalyser,
-) {
+fun FacePermissionGranted( navController: NavController, context: Context,  analyser: FaceAnalyser) {
 
     val cameraReady = remember { mutableStateOf(false) }
     val hasCaptured = remember { mutableStateOf(false) }
@@ -96,28 +88,26 @@ fun FacePermissionGranted(
     }
 
     // Auto-capture effect when face is in box and ready
-    LaunchedEffect(analyser.isFaceInBox.value, cameraReady.value) {
-        if (cameraReady.value && analyser.isFaceInBox.value && !hasCaptured.value) {
+    val isReadyToCapture = cameraReady.value && analyser.isFaceInBox.value && !hasCaptured.value
+
+    LaunchedEffect(isReadyToCapture) {
+        if (isReadyToCapture) {
             hasCaptured.value = true // Prevent re-capture
 
             faceCapture(imageCapture, executor, analyser, context) { uri ->
                 if (uri != null) {
-                    navController.navigate(FaceVerification(
-                        userImageUri = uri.toString()
-                    ))
+                    navController.navigate(
+                        RouteFaceVerification(userImageUri = uri.toString())
+                    )
                     Toast.makeText(context, "Face Captured!", Toast.LENGTH_SHORT).show()
                 } else {
                     Log.d("FaceCapture", "Image not saved")
                 }
-                // Optional delay before allowing new captures
 
-                CoroutineScope(Dispatchers.Main).launch {
-                    delay(2000)
-                    hasCaptured.value = false
-                }
-
+                hasCaptured.value = false
             }
         }
     }
+
 
 }

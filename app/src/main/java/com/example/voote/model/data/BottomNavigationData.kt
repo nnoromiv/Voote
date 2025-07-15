@@ -13,11 +13,11 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.voote.navigation.AppRoute
-import com.example.voote.navigation.electionsObject
-import com.example.voote.navigation.historyObject
-import com.example.voote.navigation.homeObject
-import com.example.voote.navigation.profileObject
-import com.example.voote.navigation.scanObject
+import com.example.voote.navigation.RouteElections
+import com.example.voote.navigation.RouteHistory
+import com.example.voote.navigation.RouteHome
+import com.example.voote.navigation.RouteProfile
+import com.example.voote.navigation.RouteScan
 
 sealed class BottomNavigationItems(
     val icon: ImageVector,
@@ -30,35 +30,35 @@ sealed class BottomNavigationItems(
         Icons.Outlined.Home,
         Icons.Rounded.Home,
         "Home",
-        homeObject
+        RouteHome
     )
 
     data object ElectionsItem : BottomNavigationItems(
         Icons.Outlined.HowToVote,
         Icons.Rounded.HowToVote,
         "Elections",
-        electionsObject
+        RouteElections
     )
 
     data object ScanItem : BottomNavigationItems(
         Icons.Outlined.QrCodeScanner,
         Icons.Rounded.QrCodeScanner,
         "Scan",
-        scanObject
+        RouteScan
     )
 
     data object HistoryItem : BottomNavigationItems(
         Icons.Outlined.History,
         Icons.Rounded.History,
         "History",
-        historyObject
+        RouteHistory
     )
 
     data object ProfileItem : BottomNavigationItems(
         Icons.Outlined.Person,
         Icons.Rounded.Person,
         "Profile",
-        profileObject
+        RouteProfile
     )
 
     companion object {

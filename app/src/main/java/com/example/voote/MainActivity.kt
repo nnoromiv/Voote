@@ -1,20 +1,37 @@
 package com.example.voote
 
+import android.Manifest
+import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
+import androidx.annotation.RequiresPermission
+import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.voote.navigation.AppNavigation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+
+
+class ThisApplication : Application() {
+    val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+}
 
 @Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -24,8 +41,19 @@ class MainActivity : ComponentActivity() {
                 Color.GRAY
             ),
         )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                1
+            )
+        }
+
+        createNotificationChannel(this)
+
         setContent {
-            App()
+            AppNavigation()
         }
     }
 
@@ -46,9 +74,17 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Composable
-fun App() {
-    AppNavigation()
+fun createNotificationChannel(context: Context) {
+    val name = "Election Updates"
+    val descriptionText = "Notifications for election actions"
+    val importance = NotificationManager.IMPORTANCE_HIGH
+    val channel = NotificationChannel("election_channel", name, importance).apply {
+        description = descriptionText
+    }
+
+    val notificationManager: NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.createNotificationChannel(channel)
 }
 
 

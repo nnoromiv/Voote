@@ -70,7 +70,7 @@ fun SignUpForm() {
             ) {
                 TextField(
                     value = firstName,
-                    onValueChange = { signUpViewModel.setLastName(it.trim()) },
+                    onValueChange = { signUpViewModel.setFirstName(it.trim()) },
                     label = { Text("First Name") },
                     trailingIcon = {
                         Icon(

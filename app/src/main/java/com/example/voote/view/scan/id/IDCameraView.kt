@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.example.voote.navigation.AddressVerification
+import com.example.voote.navigation.RouteAddressVerification
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.utils.IdAnalyser
@@ -83,7 +83,7 @@ fun IDCameraView(
             PrimaryButton(
                 text = "Skip",
                 onClick = {
-                    navController.navigate(AddressVerification)
+                    navController.navigate(RouteAddressVerification)
                 },
                 modifier = Modifier
                     .align(Alignment.TopCenter)

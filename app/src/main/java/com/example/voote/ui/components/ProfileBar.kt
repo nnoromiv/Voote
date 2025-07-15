@@ -13,7 +13,6 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +26,7 @@ import coil.compose.AsyncImage
 import com.example.voote.utils.Constants
 
 @Composable
-fun ProfileBar( name: String, username: String, userImageUri: Uri? = Constants().imageUrl.toUri(), imageVector: ImageVector? = Icons.Outlined.Notifications, useInitials: Boolean = false,) {
+fun ProfileBar( name: String, userName: String, imageVector: ImageVector? = Icons.Outlined.Notifications, onClick: () -> Unit = {}) {
 
     Row (
         verticalAlignment = Alignment.CenterVertically
@@ -39,23 +38,17 @@ fun ProfileBar( name: String, username: String, userImageUri: Uri? = Constants()
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (useInitials) {
-                    ProfileWithInitials(name)
-                } else {
-                    ProfileImage(
-                        userImageUri = userImageUri
-                    )
-                }
+                ProfileWithInitials(name)
 
                 ProfileInfo(
                     name,
-                    username
+                    userName
                 )
             }
         }
 
         IconButton(
-            onClick = {}
+            onClick = { onClick() }
         ) {
             Icon(
                 imageVector = imageVector!!,
@@ -111,10 +104,7 @@ fun AvatarView(initials: String) {
 
 
 @Composable
-fun ProfileInfo(
-    name: String,
-    username: String
-) {
+fun ProfileInfo(name: String, userName: String) {
     Column {
         Text(
             text = name,
@@ -123,7 +113,7 @@ fun ProfileInfo(
         )
 
         Text(
-            text = "@$username",
+            text = "@$userName",
             fontSize = 16,
             fontWeight = FontWeight.Normal,
             color = Color(0x601B1B1B)

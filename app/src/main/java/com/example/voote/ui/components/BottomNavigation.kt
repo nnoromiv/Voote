@@ -1,5 +1,6 @@
 package com.example.voote.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,8 @@ import com.example.voote.model.data.BottomNavigationItems
 fun BottomNavigation(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    Log.d("BottomNavigation", "Current Route: $currentRoute")
 
     Surface(
         color = Color.Black,
@@ -60,6 +63,7 @@ fun BottomNavigation(navController: NavController) {
                     selected = isSelected,
                     onClick = {
                         if (!isSelected) {
+                            Log.d("BottomNavigation", "Navigating to ${item.route}")
                             navController.navigate(item.route) {
                                 launchSingleTop = true
                                 popUpTo(navController.graph.startDestinationId) {

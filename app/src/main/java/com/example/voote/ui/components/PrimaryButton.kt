@@ -2,8 +2,10 @@ package com.example.voote.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -33,7 +35,8 @@ fun PrimaryButton(
     enabled: Boolean = true,
     shape: RoundedCornerShape = RoundedCornerShape(5.dp),
     colors: ButtonColors? = null,
-    border: BorderStroke? = null
+    border: BorderStroke? = null,
+    icon: (@Composable () -> Unit)? = null
 ) {
     Button(
         onClick = onClick,
@@ -43,14 +46,18 @@ fun PrimaryButton(
         enabled = enabled,
         colors = colors
             ?: ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1B1B1B),
+                containerColor = Color(0xFF2B2B2B),
                 contentColor = Color.White,
                 disabledContainerColor = Color.Gray,
                 disabledContentColor = Color.White
             ),
         shape = shape,
-        border = border
+        border = border,
     ) {
+        if(icon != null) {
+            icon()
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         Text(
             text,
             fontSize = 18.sp,

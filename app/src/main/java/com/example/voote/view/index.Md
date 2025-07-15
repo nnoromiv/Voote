@@ -56,7 +56,7 @@ Here’s a breakdown of what **Google ML Kit** can do, and whether it supports t
 ### 🔚 Summary
 
 | Feature                                        | ML Kit Support | Alternatives / Notes                                  |
-| ---------------------------------------------- | -------------- | ----------------------------------------------------- |
+|------------------------------------------------|----------------|-------------------------------------------------------|
 | OCR from ID documents                          | ✅ Yes          | Great for text extraction                             |
 | NLP for entity extraction and validation       | ⚠️ Limited     | Use Google Cloud NLP or custom models                 |
 | Deepfake / GAN-based synthetic fraud detection | ❌ No           | Use TensorFlow + GAN discriminator or 3rd-party tools |

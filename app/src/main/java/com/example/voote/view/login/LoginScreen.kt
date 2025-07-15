@@ -7,15 +7,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.voote.navigation.RouteHome
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.Text
+import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.KycViewModel
+import com.example.voote.viewModel.UserViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+
+    LaunchedEffect(Unit) {
+        if(authManager.isLoggedIn()) navController.navigate(RouteHome)
+    }
+
     Scaffold {
         innerPadding ->
         Column(
@@ -49,7 +59,7 @@ fun LoginScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                LoginButtons(navController)
+                LoginButtons(userViewModel, kycViewModel, navController)
             }
         }
     }

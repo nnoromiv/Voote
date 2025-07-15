@@ -16,14 +16,7 @@ class TokenVerificationViewModel: ViewModel() {
         }
     }
 
-    private  val _storedPhoneNumber = MutableStateFlow<String>("")
-    val storedPhoneNumber : StateFlow<String> = _storedPhoneNumber.asStateFlow()
-
-    fun setStoredPhoneNumber(value: String) {
-        _storedPhoneNumber.value = value
-    }
-
-    private  val _storedVerificationId = MutableStateFlow<String>("")
+    private  val _storedVerificationId = MutableStateFlow("")
     val storedVerificationId : StateFlow<String> = _storedVerificationId.asStateFlow()
 
     fun setStoredVerificationId(value: String) {
@@ -33,7 +26,4 @@ class TokenVerificationViewModel: ViewModel() {
     private  val _resendToken = MutableStateFlow<PhoneAuthProvider.ForceResendingToken?>(null)
     val resendToken : StateFlow<PhoneAuthProvider.ForceResendingToken?> = _resendToken.asStateFlow()
 
-    fun setResendToken(value: PhoneAuthProvider.ForceResendingToken?) {
-        _resendToken.value = value
-    }
 }

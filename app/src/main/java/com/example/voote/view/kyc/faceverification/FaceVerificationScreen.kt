@@ -1,6 +1,5 @@
 package com.example.voote.view.kyc.faceverification
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,41 +9,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.navigation.ScanFace
-import com.example.voote.navigation.homeObject
+import com.example.voote.firebase.data.Status
+import com.example.voote.navigation.RouteHome
+import com.example.voote.navigation.RouteScanFace
+import com.example.voote.navigation.RouteStatus
+import com.example.voote.navigation.toJson
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
-import com.example.voote.utils.helpers.generateHMAC
-import com.example.voote.utils.helpers.getOrCreateHMACKey
-import com.example.voote.utils.helpers.verifyHMAC
+import com.example.voote.view.LoaderScreen
 import com.example.voote.viewModel.AuthViewModel
-import com.example.voote.viewModel.WalletViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun FaceVerificationScreen(navController: NavController, userImageUri: String) {
+fun FaceVerificationScreen(authManager: AuthViewModel, userImageUri: String, navController: NavController) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val verification = Verification(authManager)
 
-    val secretKey = getOrCreateHMACKey()
-
-    val authViewModel : AuthViewModel = viewModel()
-    val walletViewModel : WalletViewModel = viewModel()
-
-    val uid = authViewModel.userUid().toString()
-
-    val address = walletViewModel.address
-    val walletId = generateHMAC(uid + address, secretKey)
-
-    val isValid = verifyHMAC(uid + address, walletId, secretKey)
+    val isLoading = remember { mutableStateOf(false) }
 
     fun handleFaceImage() {
         if(userImageUri.isEmpty()) {
@@ -54,66 +48,82 @@ fun FaceVerificationScreen(navController: NavController, userImageUri: String) {
 
         val imageUri = userImageUri.toUri()
 
-        if(!isValid) {
-            Toast.makeText(context, "Invalid User", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val fileName = "faceImage"
 
-        val imageToSave = "faceImage"
-        Verification().uploadImage(imageUri, imageToSave, imageToSave) {
-                onError -> Log.e("ImageCapture", "Error uploading image: ${onError.message}")
-        }
+        isLoading.value = true
 
-        Toast.makeText(context, "Image saved", Toast.LENGTH_LONG).show()
+        coroutineScope.launch {
+            val result = verification.uploadImage(imageUri, fileName)
 
-        navController.navigate(homeObject)
-    }
+            if(result.status == Status.ERROR) {
 
-    Scaffold {
-            innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Logo()
+                navController.navigate(RouteStatus(
+                    status = result.status,
+                    nextScreen = ""
+                ))
 
-            Text(
-                text = "Face Recognition",
-                fontSize = 30,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "Capture your face",
-                fontSize = 16,
-                fontWeight = FontWeight.Normal,
-                softWrap = true,
-            )
-
-            HorizontalDivider(
-                color = Color(0x401B1B1B),
-            )
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                FaceCircle(
-                    onClick = {
-                        navController.navigate(ScanFace)
-                    },
-                    userImageUri
-                )
+                return@launch
             }
 
-            PrimaryButton(
-                text = "Continue",
-                onClick = { handleFaceImage() },
-                modifier = Modifier.padding(vertical = 10.dp)
-            )
+            navController.navigate(RouteStatus(
+                status = result.status,
+                nextScreen = RouteHome.toJson()
+            ))
+
+            isLoading.value = false
+
+        }
+    }
+
+    if(isLoading.value) {
+        LoaderScreen()
+    } else {
+        Scaffold {
+                innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Logo()
+
+                Text(
+                    text = "Face Recognition",
+                    fontSize = 30,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Capture your face",
+                    fontSize = 16,
+                    fontWeight = FontWeight.Normal,
+                    softWrap = true,
+                )
+
+                HorizontalDivider(
+                    color = Color(0x401B1B1B),
+                )
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    FaceCircle(
+                        onClick = {
+                            navController.navigate(RouteScanFace)
+                        },
+                        userImageUri
+                    )
+                }
+
+                PrimaryButton(
+                    text = "Continue",
+                    onClick = { handleFaceImage() },
+                    modifier = Modifier.padding(vertical = 10.dp)
+                )
+            }
         }
     }
 }

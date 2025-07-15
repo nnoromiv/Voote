@@ -39,6 +39,7 @@ fun ErrorHandlingInputField (value: String, onValueChange: (String) -> Unit, isE
         if (isError) {
             Text(
                 text = errorMessage,
+                fontSize = 12,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 6.dp)

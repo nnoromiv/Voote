@@ -43,7 +43,7 @@ fun NoHistory() {
             )
 
             Text(
-                "You have not cast any vote.",
+                "Make a Transaction",
                 fontSize = 18
             )
 

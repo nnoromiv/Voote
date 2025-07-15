@@ -21,18 +21,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.example.voote.navigation.AddressVerification
+import com.example.voote.navigation.RouteAddressVerification
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.utils.FaceAnalyser
 
-
 @Composable
-fun FaceCameraView(
-    navController: NavController,
-    previewView: PreviewView,
-    analyser: FaceAnalyser,
-) {
+fun FaceCameraView(navController: NavController, previewView: PreviewView,  analyser: FaceAnalyser) {
 
     val borderColor by animateColorAsState(
         targetValue = if (analyser.isFaceInBox.value) Color.Green else Color.Red,
@@ -53,7 +48,6 @@ fun FaceCameraView(
                     .background(Color.Black)
             )
 
-            // Overlay Box (passport should be within this)
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -78,7 +72,7 @@ fun FaceCameraView(
             PrimaryButton(
                 text = "Skip",
                 onClick = {
-                    navController.navigate(AddressVerification)
+                    navController.navigate(RouteAddressVerification)
                 },
                 modifier = Modifier
                     .align(Alignment.TopCenter)

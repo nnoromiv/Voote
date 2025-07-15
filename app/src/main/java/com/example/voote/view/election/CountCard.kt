@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.example.voote.ui.components.Text
 
 @Composable
-fun CountCard() {
+fun CountCard(label: String = "Total Vote Count", value: String = "13 974 799") {
     Card(
         modifier = Modifier
             .wrapContentWidth()
@@ -34,7 +34,7 @@ fun CountCard() {
         ) {
             Column {
                 Text(
-                    text = "Total Vote Count",
+                    text = label,
                     fontSize = 14,
                     fontWeight = FontWeight.Normal,
                     color = Color.White
@@ -44,7 +44,7 @@ fun CountCard() {
                 )
 
                 Text(
-                    text = "13 974 799",
+                    text = value,
                     fontSize = 24,
                     fontWeight = FontWeight.Bold,
                     color = Color.White

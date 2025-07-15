@@ -9,13 +9,12 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.example.voote.ThisApplication
 import com.example.voote.utils.helpers.vibratePhone
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,6 +30,8 @@ class IdAnalyser (
     private val recognizer = TextRecognition.getClient(
         TextRecognizerOptions.DEFAULT_OPTIONS
     )
+
+    val coroutineScope = (context.applicationContext as ThisApplication).appScope
 
     @OptIn(ExperimentalGetImage::class)
     fun analyzeBitmap(bitmap: Bitmap, onlyDetectBox: Boolean = false) {
@@ -49,7 +50,7 @@ class IdAnalyser (
 
                     detectionJob?.cancel()
 
-                    detectionJob = CoroutineScope(Dispatchers.Main).launch {
+                    detectionJob = coroutineScope.launch {
                         delay(700)
                         vibratePhone(context)
                         onIdDetected(extractedFields)
@@ -114,11 +115,11 @@ class IdAnalyser (
         }
     }
 
-    private fun cancelDetectionJob() {
-        detectionJob?.cancel()
-        detectionJob = null
-        isIDinBox.value = false
-    }
+//    private fun cancelDetectionJob() {
+//        detectionJob?.cancel()
+//        detectionJob = null
+//        isIDinBox.value = false
+//    }
 
     private fun extractPassportFields(text: String): Map<String, String> {
         Log.d("ImageCapture", text)
@@ -134,11 +135,6 @@ class IdAnalyser (
         nameRegex.find(text)?.let {
             details["FirstName"] = it.groupValues[1].replace("<", " ").trim()
             details["LastName"] = it.groupValues[2].replace("<", " ").trim()
-        }
-
-        if (details.isNotEmpty()) {
-            cancelDetectionJob()
-            isIDinBox.value = false
         }
 
         return details

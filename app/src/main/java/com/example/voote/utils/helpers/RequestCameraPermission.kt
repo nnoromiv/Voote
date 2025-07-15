@@ -9,10 +9,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun RequestCameraPermission(
-    onCameraPermissionGranted: @Composable () -> Unit,
-    onCameraPermissionDenied: @Composable () -> Unit
-) {
+fun RequestCameraPermission(onCameraPermissionGranted: @Composable () -> Unit, onCameraPermissionDenied: @Composable () -> Unit) {
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
     LaunchedEffect(Unit) {

@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" // this version matches your Kotlin version
     alias(libs.plugins.kotlin.serialization)
-//    id("org.springframework.boot") version "3.5.0"
     id("com.google.gms.google-services")
 }
 
@@ -41,6 +40,7 @@ android {
     buildFeatures {
         compose = true
     }
+    @Suppress("UnstableApiUsage")
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
     }
@@ -90,7 +90,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.network.okhttp)
-implementation(libs.coil.kt.coil.compose)
+    implementation(libs.coil.kt.coil.compose)
     implementation(libs.material3)
     implementation (libs.accompanist.permissions)
 
@@ -105,9 +105,11 @@ implementation(libs.coil.kt.coil.compose)
     implementation (libs.text.recognition)
     implementation(libs.face.detection)
 
-    implementation(libs.kotlinx.serialization.json) // latest stable as of mid-2024
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.core)
+    implementation(libs.abi)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
@@ -117,5 +119,10 @@ implementation(libs.coil.kt.coil.compose)
     implementation(libs.gson)
 
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.zxing.core)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    implementation(libs.icons.lucide)
+    implementation(libs.accompanist.swiperefresh)
 
 }

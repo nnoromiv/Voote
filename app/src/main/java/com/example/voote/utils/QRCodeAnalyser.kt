@@ -8,9 +8,7 @@ import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 
-class QRCodeAnalyser (
-    private val onQrCodeScanned: (String) -> Unit
-) : ImageAnalysis.Analyzer {
+class QRCodeAnalyser (private val onQrCodeScanned: (String) -> Unit) : ImageAnalysis.Analyzer {
 
     private val scanner = BarcodeScanning.getClient()
 

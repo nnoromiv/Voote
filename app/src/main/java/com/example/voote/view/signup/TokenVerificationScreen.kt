@@ -1,6 +1,7 @@
 package com.example.voote.view.signup
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -11,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,29 +28,97 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Auth
+import com.example.voote.firebase.data.Status
+import com.example.voote.navigation.RoutePersonalVerification
 import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.TokenVerificationViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import kotlinx.coroutines.launch
 
 @Composable
-fun TokenVerificationScreen(navController: NavController) {
-    var auth: FirebaseAuth = Firebase.auth
+fun TokenVerificationScreen(phoneNumber: String, navController: NavController) {
+    val auth = Auth()
 
     val context = LocalContext.current
     val activity = LocalActivity.current as Activity
     var isLoading by remember { mutableStateOf(false) }
+    var isTokenResendLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val tokenVerificationViewModel: TokenVerificationViewModel = viewModel()
+
     val token by tokenVerificationViewModel.token.collectAsState()
-    val storedPhoneNumber by tokenVerificationViewModel.storedPhoneNumber.collectAsState()
     val storedVerificationId by tokenVerificationViewModel.storedVerificationId.collectAsState()
-    val resendToken by tokenVerificationViewModel.resendToken.collectAsState()
+
+    LaunchedEffect(Unit) {
+
+        val result = auth.sendCode(activity, phoneNumber)
+
+        if(result.isFailure) {
+            Log.e("TokenVerificationScreen", "Error sending code to $phoneNumber", result.exceptionOrNull())
+            Toast.makeText(activity, result.exceptionOrNull()?.message, Toast.LENGTH_SHORT).show()
+            isLoading = false
+            return@LaunchedEffect
+        }
+
+        Toast.makeText(activity, "Code sent to $phoneNumber", Toast.LENGTH_SHORT).show()
+        tokenVerificationViewModel.setStoredVerificationId(result.getOrThrow().data.toString())
+        isLoading = false
+
+    }
+
+    fun resendToken() {
+        isTokenResendLoading = true
+
+        coroutineScope.launch {
+            val result = auth.sendCode(activity, phoneNumber)
+
+            if(result.isFailure) {
+                Toast.makeText(context, result.exceptionOrNull()?.message, Toast.LENGTH_SHORT).show()
+                isTokenResendLoading = false
+                return@launch
+            }
+
+            Toast.makeText(context, "Token resent", Toast.LENGTH_SHORT).show()
+            tokenVerificationViewModel.setStoredVerificationId(result.getOrThrow().data.toString())
+            isTokenResendLoading = false
+        }
+    }
+
+    fun verifyToken() {
+
+        isLoading = true
+
+        if (storedVerificationId.isEmpty()) {
+            Toast.makeText( context, "Can't verify token, Retry later", Toast.LENGTH_SHORT ).show()
+            isLoading = false
+            return
+        }
+
+        if (token.any { it.isEmpty() }) {
+            Toast.makeText(context, "Invalid token", Toast.LENGTH_SHORT).show()
+            isLoading = false
+            return
+        }
+
+        coroutineScope.launch {
+            val result = auth.verifyPhoneNumber(storedVerificationId, token.joinToString(""))
+
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            isLoading = false
+
+            if(result.status == Status.ERROR) {
+                Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            navController.navigate(RoutePersonalVerification)
+
+        }
+    }
 
     Scaffold {
             innerPadding ->
@@ -63,7 +134,7 @@ fun TokenVerificationScreen(navController: NavController) {
             )
 
             Text(
-                text = "Token sent to your number",
+                text = "Token sent to you",
                 fontSize = 16,
                 fontWeight = FontWeight.Normal,
             )
@@ -81,20 +152,16 @@ fun TokenVerificationScreen(navController: NavController) {
                 )
             }
 
-            CTextButton(
-                text = "Resend Token",
-                onClick = {
-                    if(resendToken == null || storedPhoneNumber.isEmpty()) {
-                        Toast.makeText(context, "Resending token failed", Toast.LENGTH_SHORT).show()
-                        return@CTextButton
-                    }
-
-                    Auth().sendVerificationCode(auth, activity, storedPhoneNumber.toString(), navController, true)
-                },
-                modifier = Modifier.align(Alignment.End),
-                color = Color(0x401B1B1B),
-                enabled = true
-            )
+            if(isTokenResendLoading) {
+                Loader()
+            } else {
+                CTextButton(
+                    text = "Resend Token",
+                    onClick = { resendToken() },
+                    modifier = Modifier.align(Alignment.End),
+                    color = Color(0x401B1B1B),
+                )
+            }
 
             if(isLoading) {
                 Row(
@@ -112,41 +179,9 @@ fun TokenVerificationScreen(navController: NavController) {
 
                     PrimaryButton(
                         text = "Continue",
-                        onClick = {
-
-                            isLoading = true
-
-                            if (storedVerificationId.isEmpty()) {
-                                Toast.makeText(
-                                    context,
-                                    "Verification failed, resending token",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                isLoading = false
-                                return@PrimaryButton
-                            }
-
-                            if (token.any { it.isEmpty() }) {
-                                Toast.makeText(context, "Invalid token", Toast.LENGTH_SHORT).show()
-                                isLoading = false
-                                return@PrimaryButton
-                            }
-
-                            try {
-
-                                Auth().verifyPhoneNumberWithCode(
-                                    auth,
-                                    storedVerificationId,
-                                    token.joinToString(""),
-                                    navController
-                                )
-                                isLoading = false
-                            } catch (e: Exception) {
-                                isLoading = false
-                                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        modifier = Modifier.padding(vertical = 20.dp)
+                        onClick = { verifyToken() },
+                        modifier = Modifier.padding(vertical = 20.dp),
+                        enabled = token.all { it.isNotEmpty() }
                     )
                 }
             }

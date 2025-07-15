@@ -9,25 +9,22 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.example.voote.ThisApplication
 import com.example.voote.utils.helpers.vibratePhone
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class FaceAnalyser (
-    private val context: Context,
-    private val onFaceAnalysed: (Map<String, String>) -> Unit,
-) {
+class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed: (Map<String, String>) -> Unit) {
 
     val isFaceInBox = mutableStateOf(false)
     private var lastFeedbackTime = 0L
     private var detectionJob: Job? = null
+    val coroutineScope = (context.applicationContext as ThisApplication).appScope
 
     private val recognizer = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -50,7 +47,7 @@ class FaceAnalyser (
 
                     detectionJob?.cancel()
 
-                    detectionJob = CoroutineScope(Dispatchers.Main).launch {
+                    detectionJob = coroutineScope.launch {
                         delay(700)
                         vibratePhone(context)
                         onFaceAnalysed(liveliness)
@@ -121,11 +118,11 @@ class FaceAnalyser (
         }
     }
 
-    private fun cancelDetectionJob() {
-        detectionJob?.cancel()
-        detectionJob = null
-        isFaceInBox.value = false
-    }
+//    private fun cancelDetectionJob() {
+//        detectionJob?.cancel()
+//        detectionJob = null
+//        isFaceInBox.value = false
+//    }
 
     private fun detectLiveliness(face: Face): Map<String, String> {
         val details = mutableMapOf<String, String>()
@@ -158,11 +155,6 @@ class FaceAnalyser (
                 ((face.leftEyeOpenProbability ?: 0f) > 0.5 && (face.rightEyeOpenProbability
                     ?: 0f) > 0.5)
         details["IsLive"] = if (isLive) "Yes" else "Uncertain"
-
-        if (details.isNotEmpty()) {
-            cancelDetectionJob()
-            isFaceInBox.value = false
-        }
 
         return details
     }

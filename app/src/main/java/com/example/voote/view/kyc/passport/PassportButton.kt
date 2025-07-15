@@ -1,35 +1,36 @@
 package com.example.voote.view.kyc.passport
 
-import android.app.Activity
-import android.widget.Toast
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.navigation.DriverLicenceVerification
-import com.example.voote.navigation.ScanID
-import com.example.voote.navigation.homeObject
+import com.example.voote.firebase.data.Status
+import com.example.voote.navigation.RouteDriverLicenceVerification
+import com.example.voote.navigation.RouteHome
+import com.example.voote.navigation.RouteScanID
+import com.example.voote.navigation.RouteStatus
+import com.example.voote.navigation.toJson
 import com.example.voote.ui.components.COutlinedButton
-import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.PrimaryButton
+import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
-fun PassportButton(navController: NavController, kycViewModel: KycViewModel) {
+fun PassportButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     val isLoading = remember { mutableStateOf(true) }
-    val activity = LocalActivity.current as Activity
+    val verification = Verification(authManager)
+    val coroutineScope = rememberCoroutineScope()
 
     val kycData by kycViewModel.kycData.collectAsState()
     val passportNumber by kycViewModel.passportNumber.collectAsState()
@@ -37,70 +38,66 @@ fun PassportButton(navController: NavController, kycViewModel: KycViewModel) {
     val isIdError by kycViewModel.isIdError.collectAsState()
     val idErrorMessage by kycViewModel.idErrorMessage.collectAsState()
 
-    LaunchedEffect(Unit) {
-        delay(1000)
-        isLoading.value = false
-    }
-
     val errorExist = idErrorMessage.isNotEmpty() || isIdError || passportNumber.isEmpty() || passportExpiryDate.isEmpty()
 
     fun handleClick() {
         isLoading.value = true
 
-        try {
-            Verification().saveDocumentNumbersToDB(
-                passportNumber,
-                passportExpiryDate,
-                null,
-                null,
-                onSuccess = {
-                    isLoading.value = false
-                    val documentType = "passport"
-                    navController.navigate(ScanID(
-                        documentType
-                    ))
-                }
-            )
+        coroutineScope.launch {
+            val result = verification.saveDocumentNumbers(passportNumber, passportExpiryDate, null, null)
 
-        } catch (e: Exception) {
-            isLoading.value = false
-            Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+            if(result.status == Status.ERROR) {
+                isLoading.value = false
+
+                navController.navigate(RouteStatus(
+                    status = result.status,
+                    nextScreen = ""
+                ))
+
+                return@launch
+            }
+
+            navController.navigate(RouteStatus(
+                status = result.status,
+                nextScreen = RouteScanID(documentType = "passport").toJson()
+            ))
         }
     }
 
     val passportKycDataExist = kycData?.passportNumber?.isNotEmpty() == true && kycData?.passportExpiryDate?.isNotEmpty() == true
+    val kycDataImage = kycData?.passportImage?.isNotEmpty() == true
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if(isLoading.value) {
-            Loader()
-        } else {
-            if(passportKycDataExist) {
-                PrimaryButton(
-                    text =  "Continue",
-                    onClick = {
-                        navController.navigate(DriverLicenceVerification)
-                    },
-                    modifier = Modifier.padding(vertical = 10.dp)
-                )
-            }
-
+        if(passportKycDataExist) {
             PrimaryButton(
-                text =  "Scan Passport",
-                onClick = { handleClick() },
-                enabled = !errorExist,
+                text =  "Continue",
+                onClick = {
+                    if(kycDataImage) {
+                        navController.navigate(RouteDriverLicenceVerification)
+                    } else {
+                        navController.navigate(RouteScanID( documentType = "passport"))
+                    }
+                },
                 modifier = Modifier.padding(vertical = 10.dp)
             )
+        }
 
-            if(!passportKycDataExist) {
-                COutlinedButton(
-                    text = "Do this later",
-                    onClick = {navController.navigate(homeObject)},
-                    modifier = Modifier.padding(vertical = 10.dp)
-                )
-            }
+        PrimaryButton(
+            text =  "Scan Passport",
+            onClick = { handleClick() },
+            enabled = !errorExist,
+            modifier = Modifier.padding(vertical = 10.dp)
+        )
+
+        if(!passportKycDataExist) {
+            COutlinedButton(
+                text = "Do this later",
+                onClick = {navController.navigate(RouteHome)},
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
         }
     }
 }

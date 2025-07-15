@@ -15,12 +15,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.Text
+import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.UserViewModel
 
 
 @Composable
-fun AddressScreen(navController: NavController, userViewModel: UserViewModel, kycViewModel: KycViewModel) {
+fun AddressScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     Scaffold {
             innerPadding ->
@@ -61,9 +62,10 @@ fun AddressScreen(navController: NavController, userViewModel: UserViewModel, ky
                     .fillMaxWidth(),
             ) {
                 AddressButton(
-                    navController,
+                    authManager,
                     userViewModel,
-                    kycViewModel
+                    kycViewModel,
+                    navController
                 )
             }
         }
