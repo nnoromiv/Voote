@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.ButtonColors
@@ -33,21 +32,18 @@ fun StatusScreen(status: Status, nextScreen: String? = "", navController: NavCon
         Status.SUCCESS -> Color(0xFF00BA11)
         Status.ERROR -> Color.Red
 //        Status.PENDING -> Color.Yellow
-        else -> Color.Gray
     }
 
     val text = when (status) {
         Status.SUCCESS -> "Business Handled"
         Status.ERROR -> "Error while handling business"
 //        Status.PENDING -> "Task Pending"
-        else -> "Task Pending"
     }
 
     val imageVector = when (status) {
         Status.SUCCESS -> Icons.Outlined.Done
         Status.ERROR -> Icons.Outlined.Error
 //        Status.PENDING -> Icons.Outlined.Pending
-        else -> Icons.Outlined.Check
     }
 
     fun handleClick() {
