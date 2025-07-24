@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.example.voote.utils.helpers.calculateTimeLeftMillis
 import com.example.voote.utils.helpers.copyToClipboard
 import kotlinx.coroutines.delay
-import java.math.BigDecimal
 
 
 /**
