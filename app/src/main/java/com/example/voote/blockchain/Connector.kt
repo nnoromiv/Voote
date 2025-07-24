@@ -29,7 +29,9 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.tx.gas.DefaultGasProvider
+import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class Connector(authManager: AuthViewModel, walletViewModel: WalletViewModel)  {
@@ -228,6 +230,18 @@ class Connector(authManager: AuthViewModel, walletViewModel: WalletViewModel)  {
         }
 
         return null
+    }
+
+    fun getWalletBalance(address: String): BigDecimal? {
+        return try {
+            val ethBalance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).sendAsync().get()
+
+            val balanceInWei = ethBalance.balance
+            Convert.fromWei(balanceInWei.toString(), Convert.Unit.ETHER)
+        } catch (e: Exception) {
+            Log.e("Connector", "Failed to get wallet balance", e)
+            null
+        }
     }
 
 }

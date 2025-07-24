@@ -29,9 +29,22 @@ import androidx.compose.ui.unit.dp
 import com.example.voote.utils.helpers.calculateTimeLeftMillis
 import com.example.voote.utils.helpers.copyToClipboard
 import kotlinx.coroutines.delay
+import java.math.BigDecimal
+
+
+/**
+ * CountDown Component
+ * @param text Text to display
+ * @param walletBalance Wallet Balance
+ * @param endTime End Time
+ * @param contractAddress Contract Address
+ * @param onFinished Callback when countdown finishes
+ * @return CountDown Component
+ * @author Nnorom Christian
+ */
 
 @Composable
-fun CountDown(text: String = "", endTime: Long = 0L, contractAddress : String? = null, onFinished: () -> Unit = {}) {
+fun CountDown(text: String = "", walletBalance: String = "", endTime: Long = 0L, contractAddress : String? = null, onFinished: () -> Unit = {}) {
     val context = LocalContext.current
 
     val totalTime = calculateTimeLeftMillis(endTime)
@@ -85,7 +98,7 @@ fun CountDown(text: String = "", endTime: Long = 0L, contractAddress : String? =
                 )
 
                 Text(
-                    text = formatTime(timeLeft),
+                    text = walletBalance.ifEmpty() { formatTime(timeLeft) },
                     modifier = Modifier.padding(top = 15.dp),
                     color = Color.White,
                     fontSize = 20,

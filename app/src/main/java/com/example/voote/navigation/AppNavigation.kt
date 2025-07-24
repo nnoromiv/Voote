@@ -201,7 +201,7 @@ fun AppNavigation() {
         }
 
         composable<RouteProfile> {
-            ProfileScreen(authManager, kycViewModel, userViewModel, navController)
+            ProfileScreen(authManager, kycViewModel, userViewModel, walletViewModel, navController)
         }
 
         composable<RouteDynamicElection> {

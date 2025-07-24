@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -39,6 +40,7 @@ import com.composables.icons.lucide.LayoutDashboard
 import com.composables.icons.lucide.ListPlus
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Vote
+import com.example.voote.ThisApplication
 import com.example.voote.contract.Voote
 import com.example.voote.firebase.election.Election
 import com.example.voote.model.data.CandidateData
@@ -83,7 +85,8 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
     val cardData = remember { mutableStateOf<ElectionData?>(null) }
 
     val userAddressQRSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     var userAddressShowState by remember { mutableStateOf(false) }
 
     var isRefreshing by remember { mutableStateOf(false) }
@@ -223,7 +226,8 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElectionActionButtons(contract: Voote, userAddress: String?, authManager: AuthViewModel, walletViewModel: WalletViewModel) {
-    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val coroutineScope = (context.applicationContext as ThisApplication).appScope
 
     val createElectionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var createElectionShowSheet by remember { mutableStateOf(false) }
