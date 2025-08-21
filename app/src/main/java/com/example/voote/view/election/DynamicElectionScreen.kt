@@ -157,7 +157,6 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
 
                 ElectionCandidateColumn(
                     election = data,
-                    authManager = authManager,
                     walletViewModel = walletViewModel,
                     contract = contract!!,
                     userAddress,

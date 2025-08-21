@@ -2,7 +2,6 @@ package com.example.voote.viewModel
 
 import androidx.lifecycle.ViewModel
 import com.example.voote.model.data.DriverLicenceExtractedData
-import com.example.voote.model.data.FaceLivelinessResult
 import com.example.voote.model.data.PassportExtractedData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -25,7 +25,7 @@ import com.example.voote.viewModel.WalletViewModel
 fun MainScreen(authManager: AuthViewModel, walletViewModel: WalletViewModel, navController: NavController) {
 
     val walletData = walletViewModel.walletData.collectAsState()
-    val connector = Connector(authManager, walletViewModel)
+    val connector = Connector(walletViewModel)
 
     LaunchedEffect(Unit) {
         val value = walletData.value

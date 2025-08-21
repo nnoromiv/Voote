@@ -3,7 +3,6 @@ package com.example.voote.utils
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage

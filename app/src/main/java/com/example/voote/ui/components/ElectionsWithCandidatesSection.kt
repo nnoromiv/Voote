@@ -79,7 +79,6 @@ fun ElectionsWithCandidatesSection(elections: List<ElectionData>, candidatesMap:
                 // Show candidates for this election
                 ElectionCandidateColumn(
                     election,
-                    authManager,
                     walletViewModel,
                     contract = contract!!,
                     userAddress = userAddress,

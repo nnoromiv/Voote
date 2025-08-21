@@ -51,7 +51,7 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
     val kycData by kycViewModel.kycData.collectAsState()
     val walletData by walletViewModel.walletData.collectAsState()
 
-    val connector = Connector(authManager, walletViewModel)
+    val connector = Connector(walletViewModel)
 
     val logOutSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var logOutShowSheet by remember { mutableStateOf(false) }

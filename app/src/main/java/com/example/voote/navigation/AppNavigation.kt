@@ -61,7 +61,7 @@ fun AppNavigation() {
     )
     val identityDetailsViewModel: IdentityDetailsViewModel = remember { IdentityDetailsViewModel() }
 
-    val connector = Connector(authManager, walletViewModel)
+    val connector = Connector(walletViewModel)
     val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
 
     suspend fun loadApplicationWalletAndSetContract() {

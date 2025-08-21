@@ -79,7 +79,7 @@ fun RegisterCandidate(contract: Voote, userAddress: String?, authManager: AuthVi
     val electionData  = remember { mutableListOf<ElectionData>() }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val connector = Connector(authManager, walletViewModel)
+    val connector = Connector(walletViewModel)
     var showPreviewDialog by remember { mutableStateOf(false) }
     val contractAddress = contract.contractAddress.toString()
     val uid = authManager.userUid().toString()

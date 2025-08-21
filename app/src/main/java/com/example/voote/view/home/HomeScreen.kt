@@ -44,13 +44,11 @@ import com.example.voote.contract.Voote
 import com.example.voote.firebase.election.Election
 import com.example.voote.model.data.CandidateData
 import com.example.voote.model.data.ElectionData
-import com.example.voote.navigation.RouteScanFace
 import com.example.voote.ui.components.BottomNavigation
 import com.example.voote.ui.components.CountDown
 import com.example.voote.ui.components.ElectionsWithCandidatesSection
 import com.example.voote.ui.components.KYCReminder
 import com.example.voote.ui.components.Loader
-import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.ProfileBar
 import com.example.voote.ui.components.Text
 import com.example.voote.utils.helpers.getElectionWithEarliestEndDate

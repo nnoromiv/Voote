@@ -58,7 +58,7 @@ fun CreateElectionModal(contract: Voote, userAddress: String?, authManager: Auth
     val electionTitle by electionViewModel.electionTitle.collectAsState()
     val startTime by electionViewModel.startTime.collectAsState()
     val endTime by electionViewModel.endTime.collectAsState()
-    val connector = Connector(authManager, walletViewModel)
+    val connector = Connector(walletViewModel)
     var showPreviewDialog by remember { mutableStateOf(false) }
     val contractAddress = contract.contractAddress.toString()
     val uid = authManager.userUid().toString()

@@ -42,7 +42,6 @@ import com.example.voote.model.data.CandidateData
 import com.example.voote.model.data.ElectionData
 import com.example.voote.utils.helpers.openWebsite
 import com.example.voote.utils.helpers.sendNotification
-import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,10 +50,10 @@ import kotlinx.coroutines.withContext
 @Composable
 @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 @OptIn(ExperimentalMaterial3Api::class)
-fun CandidateModal(election: ElectionData?, authManager: AuthViewModel, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, selectedCandidate: CandidateData?, sheetState: SheetState, onDismissRequest: () -> Unit) {
+fun CandidateModal(election: ElectionData?, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, selectedCandidate: CandidateData?, sheetState: SheetState, onDismissRequest: () -> Unit) {
 
     val isLoading = remember { mutableStateOf(false) }
-    val connector = Connector(authManager, walletViewModel)
+    val connector = Connector(walletViewModel)
     var showPreviewDialog by remember { mutableStateOf(false) }
     val contractAddress = contract.contractAddress.toString()
     val fromAddress = userAddress.toString()

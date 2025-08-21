@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.example.voote.contract.Voote
 import com.example.voote.model.data.CandidateData
 import com.example.voote.model.data.ElectionData
-import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.launch
 
@@ -38,7 +37,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ElectionCandidateColumn(election : ElectionData?,  authManager: AuthViewModel, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, candidates: List<CandidateData>, isDynamic: Boolean = false) {
+fun ElectionCandidateColumn(election : ElectionData?, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, candidates: List<CandidateData>, isDynamic: Boolean = false) {
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -94,7 +93,6 @@ fun ElectionCandidateColumn(election : ElectionData?,  authManager: AuthViewMode
     if (showSheet && selectedCandidate != null) {
         CandidateModal(
             election = election,
-            authManager = authManager,
             walletViewModel = walletViewModel,
             contract = contract,
             userAddress = userAddress,

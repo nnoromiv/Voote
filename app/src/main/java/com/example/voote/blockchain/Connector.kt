@@ -5,7 +5,6 @@ import com.example.voote.contract.Voote
 import com.example.voote.firebase.data.VotePreview
 import com.example.voote.utils.Constants
 import com.example.voote.utils.helpers.decryptWithKeyStore
-import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -33,7 +32,7 @@ import org.web3j.utils.Numeric
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class Connector(authManager: AuthViewModel, walletViewModel: WalletViewModel)  {
+class Connector(walletViewModel: WalletViewModel)  {
 
     val userAddress = walletViewModel.walletData.value?.address
     val constant = Constants()
