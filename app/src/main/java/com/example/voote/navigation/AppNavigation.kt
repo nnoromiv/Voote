@@ -40,6 +40,7 @@ import com.example.voote.view.scan.ScanQR
 import com.example.voote.view.signup.SignUpScreen
 import com.example.voote.view.signup.TokenVerificationScreen
 import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.IdentityDetailsViewModel
 import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.UserViewModel
 import com.example.voote.viewModel.WalletViewModel
@@ -58,6 +59,7 @@ fun AppNavigation() {
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(context.applicationContext as Application)
     )
+    val identityDetailsViewModel: IdentityDetailsViewModel = remember { IdentityDetailsViewModel() }
 
     val connector = Connector(authManager, walletViewModel)
     val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
@@ -211,7 +213,7 @@ fun AppNavigation() {
 
         composable<RouteScanID> {
             val args = it.toRoute<RouteScanID>()
-            ScanID(authManager, args.documentType, navController)
+            ScanID(authManager, args.documentType, identityDetailsViewModel, userViewModel, navController)
         }
 
         composable<RouteScanFace> {

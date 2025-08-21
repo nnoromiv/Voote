@@ -25,15 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
-import com.example.voote.navigation.RouteAddressVerification
-import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.utils.IdAnalyser
 
 @Composable
 fun IDCameraView(
-    navController: NavController,
     previewView: PreviewView,
     onClick : () -> Unit,
     analyser: IdAnalyser,
@@ -62,36 +58,26 @@ fun IDCameraView(
             // Overlay Box (passport should be within this)
             Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .width(300.dp)
+                    .align(Alignment.TopCenter)
+                    .width(250.dp)
                     .height(200.dp)
+                    .padding(top = 20.dp)
                     .border(3.dp, borderColor, RoundedCornerShape(8.dp))
                     .background(Color.Transparent)
             )
 
             // Optional: Label or instruction
             Text(
-                "Align your passport within the box",
+                "Align your document within the box",
                 color = Color.White,
                 fontSize = 16,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 20.dp)
-            )
-
-            // Debug Button: Remove later
-            PrimaryButton(
-                text = "Skip",
-                onClick = {
-                    navController.navigate(RouteAddressVerification)
-                },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 60.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(top = 20.dp, bottom = 20.dp)
             )
 
             IconButton(
-                onClick = onClick,
+                onClick = { onClick() },
                 enabled = cameraReady.value,
                 modifier = Modifier
                     .size(100.dp)
@@ -101,7 +87,9 @@ fun IDCameraView(
                     imageVector = Icons.Outlined.Camera,
                     contentDescription = "Capture",
                     tint = if (cameraReady.value) Color.White else Color.Gray,
-                    modifier = Modifier.size(100.dp).padding(bottom = 40.dp)
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(bottom = 40.dp)
                 )
             }
 

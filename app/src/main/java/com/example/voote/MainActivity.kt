@@ -25,7 +25,6 @@ import kotlinx.coroutines.SupervisorJob
 
 class ThisApplication : Application() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
 }
 
 @Suppress("DEPRECATION")

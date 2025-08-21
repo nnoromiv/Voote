@@ -44,7 +44,6 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
 
     val auth = Auth()
     val loginViewModel: LoginViewModel = viewModel()
-    val coroutineScope  = rememberCoroutineScope()
 
     val email by loginViewModel.email.collectAsState()
     val password by loginViewModel.password.collectAsState()
@@ -55,6 +54,8 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
     var isLoading by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
 
     fun login() {
 

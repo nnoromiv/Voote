@@ -30,6 +30,8 @@ fun PassportButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navCo
 
     val isLoading = remember { mutableStateOf(true) }
     val verification = Verification(authManager)
+//    val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     val kycData by kycViewModel.kycData.collectAsState()

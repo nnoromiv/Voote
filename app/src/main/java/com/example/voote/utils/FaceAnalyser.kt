@@ -4,31 +4,36 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.example.voote.ThisApplication
+import com.example.voote.model.data.FaceLivelinessResult
 import com.example.voote.utils.helpers.vibratePhone
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed: (Map<String, String>) -> Unit) {
+class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed: (FaceLivelinessResult) -> Unit) {
 
     val isFaceInBox = mutableStateOf(false)
     private var lastFeedbackTime = 0L
-    private var detectionJob: Job? = null
     val coroutineScope = (context.applicationContext as ThisApplication).appScope
 
     private val recognizer = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
-            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL) // Landmarks (eyes, mouth, nose)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL) // Needed for smile & eye open probabilities
+            .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL) // Optional, for face shape
             .enableTracking()
             .build()
     )
@@ -41,21 +46,27 @@ class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed:
             .addOnSuccessListener { faces ->
                 val (detected, liveliness) = detectFaceAndLiveliness(faces, bitmap, onlyDetectBox)
 
-                isFaceInBox.value = detected
+                isFaceInBox.value = true
 
                 if (detected && !onlyDetectBox && shouldTriggerFeedback()) {
 
-                    detectionJob?.cancel()
+                    coroutineScope.launch {
+                        delay(2000)
 
-                    detectionJob = coroutineScope.launch {
-                        delay(700)
+
+                        if(liveliness == null) {
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(context, "Uncertain face", Toast.LENGTH_SHORT).show()
+                            }
+                            return@launch
+                        }
+
                         vibratePhone(context)
                         onFaceAnalysed(liveliness)
                     }
                 }
             }
             .addOnFailureListener{
-                Log.e("FaceAnalyser", "Scanning failed", it)
                 isFaceInBox.value = false
             }
             .addOnCompleteListener {
@@ -64,11 +75,7 @@ class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed:
 
     }
 
-    private fun detectFaceAndLiveliness(
-        faces: List<Face>,
-        bitmap: Bitmap,
-        onlyDetectBox: Boolean
-    ): Pair<Boolean, Map<String, String>> {
+    private fun detectFaceAndLiveliness( faces: List<Face>, bitmap: Bitmap, onlyDetectBox: Boolean): Pair<Boolean, FaceLivelinessResult?> {
         val imageWidth = bitmap.width.toFloat()
         val imageHeight = bitmap.height.toFloat()
 
@@ -80,37 +87,35 @@ class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed:
 
 
         val faceTargetBox = Rect(
-            screenWidth / 2 - 280,
-            screenHeight / 2 - 300,
+            screenWidth / 2 - 300,
+            100f,
             screenWidth / 2 + 300,
-            screenHeight / 2 + 280
+            100f + 1440
         )
 
         for (face in faces) {
             val bounds = face.boundingBox
+
             val centerX = bounds.exactCenterX() * scaleX
             val centerY = bounds.exactCenterY() * scaleY
             val offset = Offset(centerX, centerY)
 
-            Log.d("FaceAnalyser", "Target Box: $faceTargetBox, Offset: $offset")
-
             if (faceTargetBox.contains(offset)) {
                 return if (onlyDetectBox) {
-                    true to emptyMap()
+                    Pair(true, FaceLivelinessResult())
                 } else {
-                    true to detectLiveliness(face)
+                    Pair(true, detectLiveliness(face))
                 }
             }
-
         }
 
-        return false to emptyMap()
+        return Pair(false, FaceLivelinessResult())
     }
 
     private fun shouldTriggerFeedback(): Boolean {
         val now = System.currentTimeMillis()
 
-        return if(now - lastFeedbackTime > 3000) {
+        return if(now - lastFeedbackTime > 2000) {
             lastFeedbackTime = now
             true
         } else {
@@ -118,43 +123,54 @@ class FaceAnalyser (  private val context: Context,  private val onFaceAnalysed:
         }
     }
 
-//    private fun cancelDetectionJob() {
-//        detectionJob?.cancel()
-//        detectionJob = null
-//        isFaceInBox.value = false
-//    }
+    private var lastLeftEyeOpen = true
+    private var lastRightEyeOpen = true
 
-    private fun detectLiveliness(face: Face): Map<String, String> {
-        val details = mutableMapOf<String, String>()
+    private fun detectBlink(face: Face): Boolean {
+        val leftOpen = (face.leftEyeOpenProbability ?: 1f) > 0.5
+        val rightOpen = (face.rightEyeOpenProbability ?: 1f) > 0.5
 
-        // Smile probability (0.0 to 1.0)
-        face.smilingProbability?.let { probability ->
-            details["Smile"] = if (probability > 0.5) "Yes" else "No"
+        val blinked = (lastLeftEyeOpen && !leftOpen) || (lastRightEyeOpen && !rightOpen)
+
+        lastLeftEyeOpen = leftOpen
+        lastRightEyeOpen = rightOpen
+
+        return blinked
+    }
+
+    private fun detectLiveliness(face: Face): FaceLivelinessResult? {
+        val details = FaceLivelinessResult()
+
+        fun probabilityToYesNo(prob: Float?): String {
+            return when {
+                prob == null || prob < 0f -> "Unknown"
+                prob > 0.5 -> "Yes"
+                else -> "No"
+            }
         }
 
-        // Eye openness probability (left and right)
-        face.leftEyeOpenProbability?.let { probability ->
-            details["LeftEyeOpen"] = if (probability > 0.5) "Yes" else "No"
+        details.smile = probabilityToYesNo(face.smilingProbability)
+        details.leftEyeOpen = probabilityToYesNo(face.leftEyeOpenProbability)
+        details.rightEyeOpen = probabilityToYesNo(face.rightEyeOpenProbability)
+
+        details.headEulerY = face.headEulerAngleY
+        details.headEulerZ = face.headEulerAngleZ
+
+        face.trackingId?.let { details.trackingId }
+
+        val blinked = detectBlink(face)
+
+        val isLive = (
+                (face.smilingProbability ?: -1f) > 0.5 ||
+                        ((face.leftEyeOpenProbability ?: -1f) > 0.5 && (face.rightEyeOpenProbability ?: -1f) > 0.5) ||
+                        blinked
+                )
+
+        details.isLive = if (isLive) "Yes" else "Uncertain"
+
+        if(details.isLive == "Uncertain") {
+            return null
         }
-
-        face.rightEyeOpenProbability?.let { probability ->
-            details["RightEyeOpen"] = if (probability > 0.5) "Yes" else "No"
-        }
-
-        // Head orientation (Euler angles)
-        details["HeadEulerY"] = "%.2f".format(face.headEulerAngleY) // left-right rotation
-        details["HeadEulerZ"] = "%.2f".format(face.headEulerAngleZ) // tilt
-
-        // Add tracking ID if available
-        face.trackingId?.let {
-            details["TrackingId"] = it.toString()
-        }
-
-        // Optional: Mark as live if any condition is confidently met
-        val isLive = ((face.smilingProbability ?: 0f) > 0.5) ||
-                ((face.leftEyeOpenProbability ?: 0f) > 0.5 && (face.rightEyeOpenProbability
-                    ?: 0f) > 0.5)
-        details["IsLive"] = if (isLive) "Yes" else "Uncertain"
 
         return details
     }

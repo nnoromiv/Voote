@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0" // this version matches your Kotlin version
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10" // this version matches your Kotlin version
     alias(libs.plugins.kotlin.serialization)
     id("com.google.gms.google-services")
 }
@@ -123,9 +123,9 @@ dependencies {
     implementation(libs.bcprov.jdk15on)
     implementation(libs.gson)
 
-    implementation(libs.firebase.storage.ktx)
     implementation(libs.zxing.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.google.firebase.storage.ktx)
 
     implementation(libs.icons.lucide)
     implementation(libs.accompanist.swiperefresh)

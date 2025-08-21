@@ -41,11 +41,12 @@ import kotlinx.coroutines.launch
 fun MainButton(walletViewModel: WalletViewModel, navController: NavController) {
 
     val walletData by walletViewModel.walletData.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     val constants = Constants()
 
     val isLoading = remember { mutableStateOf(false) }
     val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
 
     val walletManager = WalletManager(context)
 

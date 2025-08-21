@@ -97,7 +97,7 @@ fun CountDown(text: String = "", walletBalance: String = "", endTime: Long = 0L,
                 )
 
                 Text(
-                    text = walletBalance.ifEmpty() { formatTime(timeLeft) },
+                    text = walletBalance.ifEmpty { formatTime(timeLeft) },
                     modifier = Modifier.padding(top = 15.dp),
                     color = Color.White,
                     fontSize = 20,

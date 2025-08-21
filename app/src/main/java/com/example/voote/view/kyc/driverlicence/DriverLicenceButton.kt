@@ -31,8 +31,9 @@ fun DriverLicenceButtons(authManager: AuthViewModel, kycViewModel: KycViewModel,
 
     val isLoading = remember { mutableStateOf(false) }
     val verification = Verification(authManager)
+//    val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
-
     val kycData by kycViewModel.kycData.collectAsState()
     val driverLicenceNumber by kycViewModel.driverLicenceNumber.collectAsState()
     val driverLicenceExpiryDate by kycViewModel.driverLicenceExpiryDate.collectAsState()

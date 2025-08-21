@@ -41,7 +41,6 @@ import kotlinx.coroutines.launch
 fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     val auth = Auth()
-    val coroutineScope = rememberCoroutineScope()
 
     val signUpViewModel : SignUpViewModel = viewModel()
     val email by signUpViewModel.email.collectAsState()
@@ -53,6 +52,10 @@ fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel:
     val emailErrorMessage by signUpViewModel.emailErrorMessage.collectAsState()
     val isPhoneNumberError by signUpViewModel.isPhoneNumberError.collectAsState()
     val phoneNumberErrorMessage by signUpViewModel.phoneNumberErrorMessage.collectAsState()
+
+//    val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
 
     val errorExist = firstName.isEmpty() || lastName.isEmpty() || password.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || isEmailError || isPhoneNumberError || emailErrorMessage.isNotEmpty() || phoneNumberErrorMessage.isNotEmpty()
     var isLoading by remember { mutableStateOf(false) }

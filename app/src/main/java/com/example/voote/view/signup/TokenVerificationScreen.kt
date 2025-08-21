@@ -46,6 +46,7 @@ fun TokenVerificationScreen(phoneNumber: String, navController: NavController) {
     val activity = LocalActivity.current as Activity
     var isLoading by remember { mutableStateOf(false) }
     var isTokenResendLoading by remember { mutableStateOf(false) }
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     val tokenVerificationViewModel: TokenVerificationViewModel = viewModel()

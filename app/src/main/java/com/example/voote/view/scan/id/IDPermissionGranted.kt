@@ -12,6 +12,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,16 +29,23 @@ import com.example.voote.utils.IdAnalyser
 import com.example.voote.utils.helpers.handleCaptureIdSuspend
 import com.example.voote.view.LoaderScreen
 import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.IdentityDetailsViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
-fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, documentType: String, analyser: IdAnalyser, navController: NavController) {
+fun IDPermissionGranted (context: Context, authManager: AuthViewModel, identityDetailsViewModel: IdentityDetailsViewModel, documentType: String, analyser: IdAnalyser, navController: NavController) {
 
     val isLoading = remember { mutableStateOf(false) }
     val lifeCycleOwner = LocalLifecycleOwner.current
     val executor = ContextCompat.getMainExecutor(context)
     val verification = Verification(authManager)
     val coroutineScope = rememberCoroutineScope()
+    var lastCapturedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val dataIsExtracted by identityDetailsViewModel.isExtracted.collectAsState()
+    val passportData by identityDetailsViewModel.passportExtractedData.collectAsState()
+    val driverLicenceData by identityDetailsViewModel.driverLicenceExtractedData.collectAsState()
 
     val cameraProviderFuture = remember {
         ProcessCameraProvider.getInstance(context)
@@ -49,7 +57,7 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
 
     val imageCapture = remember {
         ImageCapture.Builder()
-            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             .build()
     }
 
@@ -57,8 +65,11 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
 
     fun handleUpload(imageUri: Uri) {
         coroutineScope.launch {
+
             val fileName = documentType + "Image"
             val result = verification.uploadImage(imageUri, fileName)
+
+            Log.d("UPLOAD_IMAGE", result.toString())
 
             Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
 
@@ -75,11 +86,13 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
             }
 
             if(documentType == "passport"){
+                identityDetailsViewModel.clearPassportData()
                 navController.navigate(RouteStatus(
                     status = result.status,
                     nextScreen = RouteDriverLicenceVerification.toJson()
                 ))
             } else if (documentType == "driverLicence") {
+                identityDetailsViewModel.clearDriverLicenceData()
                 navController.navigate(RouteStatus(
                     status = result.status,
                     nextScreen = RouteAddressVerification.toJson()
@@ -89,28 +102,40 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
         }
     }
 
+    LaunchedEffect(dataIsExtracted) {
+        if(dataIsExtracted) {
+            lastCapturedImageUri.let { uri ->
+                Log.d("ImageCaptured", uri.toString())
+
+                if(uri != null) {
+                    handleUpload(uri)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(passportData, driverLicenceData) {
+        cameraReady.value = false
+    }
+
     fun handleCapture() {
         coroutineScope.launch {
-            Toast.makeText(context, "Keep steady while capturing...", Toast.LENGTH_SHORT).show()
-
             val isReady = cameraReady.value && analyser.isIDinBox.value
 
             if(!isReady) {
-                Toast.makeText(context, "Please align your passport", Toast.LENGTH_LONG).show()
                 return@launch
             }
 
             val imageUri = handleCaptureIdSuspend(imageCapture, executor, analyser, context)
 
             if(imageUri == null) {
-                Toast.makeText(context, "Failed to capture image", Toast.LENGTH_LONG).show()
                 return@launch
             }
 
-            Toast.makeText(context, "Captured Successful", Toast.LENGTH_LONG).show()
-            isLoading.value = true
-            handleUpload(imageUri)
+            lastCapturedImageUri = imageUri
+            Toast.makeText(context, "Image Captured", Toast.LENGTH_SHORT).show()
 
+            isLoading.value = true
         }
 
     }
@@ -119,7 +144,6 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
         LoaderScreen()
     } else {
         IDCameraView(
-            navController,
             previewView,
             onClick = { handleCapture() },
             analyser,
@@ -127,6 +151,7 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
         )
     }
 
+    // Launch camera preview
     LaunchedEffect(cameraReady.value) {
         if(!cameraReady.value) {
             val cameraProvider = cameraProviderFuture.get()
@@ -142,7 +167,8 @@ fun IDPermissionGranted ( context: Context, authManager: AuthViewModel, document
                 .also {
                     it.setAnalyzer(executor) { imageProxy ->
                         val bitmap = imageProxy.toBitmap()
-                        analyser.analyzeBitmap(bitmap, onlyDetectBox = true)
+                        analyser.analyzeBitmap(bitmap)
+                        handleCapture()
                         imageProxy.close()
                     }
                 }

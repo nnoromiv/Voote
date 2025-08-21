@@ -48,6 +48,8 @@ import javax.crypto.spec.IvParameterSpec
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
@@ -59,6 +61,7 @@ import com.google.zxing.EncodeHintType
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
 import androidx.core.net.toUri
+import com.example.voote.firebase.data.Status
 import com.example.voote.model.data.ElectionData
 import java.time.Instant
 import java.time.LocalDate
@@ -267,7 +270,23 @@ fun getUserLocation(activity: Activity, context: Context, onLocationDetected: (L
         }
 }
 
-suspend fun handleCaptureIdSuspend( imageCapture: ImageCapture, executor: Executor, analyser: IdAnalyser, context: Context): Uri? =
+fun uriToBitmap(context: Context, imageUri: Uri?): Bitmap? {
+    if (imageUri == null) {
+        return null
+    }
+
+    return try {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+        bitmap
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+suspend fun handleCaptureIdSuspend(imageCapture: ImageCapture, executor: Executor, analyser: IdAnalyser, context: Context): Uri? =
     suspendCancellableCoroutine { continuation ->
 
         imageCapture.takePicture(
@@ -277,17 +296,16 @@ suspend fun handleCaptureIdSuspend( imageCapture: ImageCapture, executor: Execut
                     super.onCaptureSuccess(image)
 
                     try {
-                        val bitmap = image.toBitmap()
-                        analyser.analyzeBitmap(bitmap)
+                        val bitmap = rotateBitmap(image.toBitmap(), 90f)
 
                         val screenWidth = Resources.getSystem().displayMetrics.widthPixels.toFloat()
                         val screenHeight = Resources.getSystem().displayMetrics.heightPixels.toFloat()
 
                         val idTargetBox = Rect(
-                            screenWidth / 2 - 250,
-                            screenHeight / 2 - 500,
-                            screenWidth / 2 + 250,
-                            screenHeight / 2 + 500
+                            screenWidth / 2 - 320,
+                            100F,
+                            screenWidth / 2 + 320,
+                            100F + 750
                         )
 
                         val scaleX = bitmap.width / screenWidth
@@ -306,6 +324,19 @@ suspend fun handleCaptureIdSuspend( imageCapture: ImageCapture, executor: Execut
                             cropRect,
                             "id_${System.currentTimeMillis()}.jpg"
                         )
+
+                        if (savedImageUri.status == Status.ERROR) {
+                            Log.e("ImageCapture", "Error saving image: ${savedImageUri.message}")
+                        }
+
+                        val croppedBitmap = uriToBitmap(context, savedImageUri.data)
+
+                        if(croppedBitmap == null) {
+                            Log.e("ImageCapture", "Error converting image to bitmap")
+                            return
+                        }
+
+                        analyser.analyzeBitmap(croppedBitmap)
 
                         if(savedImageUri is AppResult.Error) {
                             Log.e("ImageCapture", "Error saving image: ${savedImageUri.message}")
@@ -446,4 +477,10 @@ fun openWebsite(context: Context, url: String) {
     } else {
         Toast.makeText(context, "No browser found to open this link.", Toast.LENGTH_SHORT).show()
     }
+}
+
+fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
+    val matrix = Matrix()
+    matrix.postRotate(degrees)
+    return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
 }

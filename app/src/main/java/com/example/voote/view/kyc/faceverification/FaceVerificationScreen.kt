@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FaceVerificationScreen(authManager: AuthViewModel, userImageUri: String, navController: NavController) {
     val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
     val verification = Verification(authManager)
 

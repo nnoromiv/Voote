@@ -33,8 +33,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
     val isLoading = remember { mutableStateOf(false) }
     val verification = Verification(authManager)
 

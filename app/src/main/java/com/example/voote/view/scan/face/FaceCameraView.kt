@@ -10,29 +10,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
-import com.example.voote.navigation.RouteAddressVerification
-import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.utils.FaceAnalyser
 
 @Composable
-fun FaceCameraView(navController: NavController, previewView: PreviewView,  analyser: FaceAnalyser) {
+fun FaceCameraView(previewView: PreviewView,  analyser: FaceAnalyser) {
 
     val borderColor by animateColorAsState(
         targetValue = if (analyser.isFaceInBox.value) Color.Green else Color.Red,
         animationSpec = tween(500)
     )
+
+    val ovalShape: Shape = GenericShape { size, _ ->
+        addOval(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height))
+    }
 
     Scaffold { innerPadding ->
         Box(
@@ -51,32 +52,19 @@ fun FaceCameraView(navController: NavController, previewView: PreviewView,  anal
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .width(250.dp)
+                    .width(200.dp)
                     .height(300.dp)
-                    .clip(CircleShape)
-                    .border(3.dp, borderColor, CircleShape)
-                    .background(Color.Transparent)
+                    .border(3.dp, borderColor, ovalShape)
+                    .background(Color.Transparent, shape = ovalShape)
             )
 
-            // Optional: Label or instruction
             Text(
-                "Align your face within the circle",
+                "Look Straight into the Camera",
                 color = Color.White,
                 fontSize = 16,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 20.dp)
-            )
-
-            // Debug Button: Remove later
-            PrimaryButton(
-                text = "Skip",
-                onClick = {
-                    navController.navigate(RouteAddressVerification)
-                },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 60.dp)
             )
 
         }

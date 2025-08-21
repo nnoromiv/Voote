@@ -44,7 +44,6 @@ fun FacePermissionGranted( navController: NavController, context: Context,  anal
     }
 
     FaceCameraView(
-        navController,
         previewView,
         analyser,
     )
@@ -64,7 +63,7 @@ fun FacePermissionGranted( navController: NavController, context: Context,  anal
                 .also {
                     it.setAnalyzer(executor) { imageProxy ->
                         val bitmap = imageProxy.toBitmap()
-                        analyser.analyzeBitmap(bitmap, onlyDetectBox = true)
+                        analyser.analyzeBitmap(bitmap, true)
                         imageProxy.close()
                     }
                 }

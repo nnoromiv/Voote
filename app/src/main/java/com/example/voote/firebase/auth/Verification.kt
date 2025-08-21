@@ -3,6 +3,8 @@ package com.example.voote.firebase.auth
 import android.net.Uri
 import android.util.Log
 import com.example.voote.firebase.data.AppResult
+import com.example.voote.model.data.DriverLicenceExtractedData
+import com.example.voote.model.data.PassportExtractedData
 import com.example.voote.model.data.WalletIdData
 import com.example.voote.utils.helpers.generateHMAC
 import com.example.voote.utils.helpers.getOrCreateHMACKey
@@ -167,6 +169,68 @@ class Verification(authManager: AuthViewModel) {
         } catch (e: Exception) {
             Log.e("Firestore", "Failed to update address", e)
             AppResult.Error("Failed to update address: ${e.localizedMessage}")
+        }
+    }
+
+    suspend fun uploadPassportDataToFirebase(data: PassportExtractedData) : AppResult<Any> {
+
+        if (uid.isEmpty()) {
+            return AppResult.Error("User ID is empty")
+        }
+
+        val docRef = db.collection("users")
+            .document(uid)
+            .collection("data")
+            .document("passport") // fixed doc name (or use passport number)
+
+        val dataMap = mapOf(
+            "countryCode" to data.countryCode,
+            "lastName" to data.lastName,
+            "givenNames" to data.givenNames,
+            "passportNumber" to data.passportNumber,
+            "nationality" to data.nationality,
+            "dateOfBirth" to data.dateOfBirth,
+            "sex" to data.sex,
+            "expiryDate" to data.expiryDate,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        return try {
+            docRef.set(dataMap).await()
+            AppResult.Success("Passport data uploaded successfully")
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to upload passport data", e)
+            AppResult.Error(e.message ?: "Failed to upload passport data")
+        }
+    }
+
+    suspend fun uploadDriverLicenceDataToFirebase(data: DriverLicenceExtractedData) : AppResult<Any> {
+
+        if (uid.isEmpty()) {
+            return AppResult.Error("User ID is empty")
+        }
+
+        val docRef = db.collection("users")
+            .document(uid)
+            .collection("data")
+            .document("driverLicence") // fixed doc name (or use passport number)
+
+        val dataMap = mapOf(
+            "surname" to data.surname,
+            "firstname" to data.firstname,
+            "dob" to data.dob,
+            "issueDate" to data.issueDate,
+            "licenceNumber" to data.licenceNumber,
+            "expiryDate" to data.expiryDate,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        return try {
+            docRef.set(dataMap).await()
+            AppResult.Success("Data uploaded successfully")
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to upload driverLicence data", e)
+            AppResult.Error(e.message ?: "Failed to upload driverLicence data")
         }
     }
 

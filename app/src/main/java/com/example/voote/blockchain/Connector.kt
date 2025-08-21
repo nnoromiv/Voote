@@ -2,7 +2,6 @@ package com.example.voote.blockchain
 
 import android.util.Log
 import com.example.voote.contract.Voote
-import com.example.voote.firebase.auth.Verification
 import com.example.voote.firebase.data.VotePreview
 import com.example.voote.utils.Constants
 import com.example.voote.utils.helpers.decryptWithKeyStore
@@ -36,8 +35,6 @@ import java.math.BigInteger
 
 class Connector(authManager: AuthViewModel, walletViewModel: WalletViewModel)  {
 
-    val uid = authManager.userUid().toString()
-    val verification = Verification(authManager)
     val userAddress = walletViewModel.walletData.value?.address
     val constant = Constants()
     val web3j: Web3j = Web3j.build(HttpService(constant.rpcUrl))

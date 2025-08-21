@@ -41,8 +41,6 @@ fun LogOutModal(authManager: AuthViewModel, kycViewModel: KycViewModel, userView
             kycViewModel.cleanKycData()
             userViewModel.cleanUserData()
 
-            // Delete wallet file? Noooooo
-
             navController.navigate(RouteLogin)
         }
     }

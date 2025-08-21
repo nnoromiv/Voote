@@ -103,6 +103,7 @@ data object RouteLoader : AppRoute
 @SerialName("RouteImportWallet")
 data object RouteImportWallet : AppRoute
 
+
 val json = Json {
     classDiscriminator = "type"
     serializersModule = SerializersModule {

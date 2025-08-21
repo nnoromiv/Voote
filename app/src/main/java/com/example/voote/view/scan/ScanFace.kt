@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 import com.example.voote.firebase.data.AppResult
 import com.example.voote.utils.FaceAnalyser
 import com.example.voote.utils.helpers.RequestCameraPermission
+import com.example.voote.utils.helpers.rotateBitmap
 import com.example.voote.utils.helpers.saveBitmapToFile
 import com.example.voote.view.scan.face.FacePermissionGranted
 import java.util.concurrent.Executor
@@ -25,7 +26,7 @@ fun ScanFace(navController: NavController){
     val analyser = FaceAnalyser(
         context,
         onFaceAnalysed = { result ->
-            Log.d("FaceCapture", "Scanned: $result")
+            Log.d("FACE_CAPTURE", "Scanned: $result")
         },
     )
 
@@ -44,30 +45,41 @@ fun ScanFace(navController: NavController){
     )
 }
 
-fun faceCapture(imageCapture: ImageCapture, executor: Executor, analyser: FaceAnalyser, context: Context, onImageSaved: (Uri?) -> Unit = {}) {
-
+fun faceCapture(
+    imageCapture: ImageCapture,
+    executor: Executor,
+    analyser: FaceAnalyser,
+    context: Context,
+    onImageSaved: (Uri?) -> Unit = {}
+) {
     imageCapture.takePicture(
         executor,
         object : ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
                 super.onCaptureSuccess(image)
 
-                val bitmap = image.toBitmap()
-                analyser.analyzeBitmap(bitmap)
+                val originalBitmap = image.toBitmap()
+                val rotatedBitmap = rotateBitmap(originalBitmap, 270f)
+
+                // Analyse face from rotated bitmap
+                analyser.analyzeBitmap(rotatedBitmap)
 
                 val screenWidth = Resources.getSystem().displayMetrics.widthPixels.toFloat()
                 val screenHeight = Resources.getSystem().displayMetrics.heightPixels.toFloat()
 
+                // Target box in screen coordinates
                 val faceTargetBox = Rect(
-                    screenWidth / 2 - 400,
-                    screenHeight / 2 - 600,
-                    screenWidth / 2 + 400,
-                    screenHeight / 2 + 600
+                    screenWidth / 2 - 300,
+                    100f,
+                    screenWidth / 2 + 300,
+                    100f + 2040
                 )
 
-                val scaleX = bitmap.width / screenWidth
-                val scaleY = bitmap.height / screenHeight
+                // Scaling factors for rotated bitmap
+                val scaleX = rotatedBitmap.width / screenWidth
+                val scaleY = rotatedBitmap.height / screenHeight
 
+                // Map screen box → rotated bitmap coordinates
                 val cropRect = Rect(
                     faceTargetBox.left * scaleX,
                     faceTargetBox.top * scaleY,
@@ -75,16 +87,28 @@ fun faceCapture(imageCapture: ImageCapture, executor: Executor, analyser: FaceAn
                     faceTargetBox.bottom * scaleY
                 )
 
-                val savedImageUri = saveBitmapToFile(bitmap, context, cropRect, "face_${System.currentTimeMillis()}.jpg")
+                // Ensure rect is inside bounds
+                val safeCropRect = Rect(
+                    cropRect.left.coerceIn(0f, rotatedBitmap.width.toFloat()),
+                    cropRect.top.coerceIn(0f, rotatedBitmap.height.toFloat()),
+                    cropRect.right.coerceIn(0f, rotatedBitmap.width.toFloat()),
+                    cropRect.bottom.coerceIn(0f, rotatedBitmap.height.toFloat())
+                )
 
-                if(savedImageUri is AppResult.Error){
+                val savedImageUri = saveBitmapToFile(
+                    rotatedBitmap,
+                    context,
+                    safeCropRect,
+                    "face_${System.currentTimeMillis()}.jpg"
+                )
+
+                if (savedImageUri is AppResult.Error) {
                     Log.e("ImageCapture", "Error saving image: ${savedImageUri.message}")
                     onImageSaved(null)
                     return
                 }
 
                 onImageSaved(savedImageUri.data)
-
                 image.close()
             }
 
@@ -93,7 +117,6 @@ fun faceCapture(imageCapture: ImageCapture, executor: Executor, analyser: FaceAn
                 onImageSaved(null)
                 Log.e("FaceCapture", "Error: ${exception.message}")
             }
-
         }
     )
 }
