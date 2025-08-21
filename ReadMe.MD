@@ -12,26 +12,32 @@ This project is a **secure, Kotlin-based digital voting platform** that integrat
 
 ### 🖥 Backend
 
-* **Kotlin** (Ktor, Spring Boot)
+* **Kotlin** (Ktor, Firebase)
 
 ### ☁️ Cloud & Storage
 
-* **AWS S3**, **Firebase Storage**, **Firestore**, **PostgreSQL**
+* **Google Cloud Platform**, **Google Firebase**, **Google Storage**, **Google Authentication**, **Google Storage**
 
 ### 🔐 Authentication & Verification
 
 * **Firebase Auth**, **OAuth2**
-* **Twilio OTP**, **Android Biometric API**
-* **Google ML Kit**, **Tesseract OCR**
-* **AWS Rekognition**, **Google Vision API**
+* **Google ML Kit**, **Google Vision API**
 
 ### ⛓️ Blockchain
 
-* **Ethereum / Hyperledger** for immutable and transparent voting records
+* **Ethereum Sepolia / Polygon Mumbai**** for immutable and transparent voting records
+* Test Net Information
+  * **Public Address**: 0x43dBDd94d852a7a0cce8996447Ab74De0B8D93BE
+  * **Public Ledger**: https://sepolia.etherscan.io/address/0x43dbdd94d852a7a0cce8996447ab74de0b8d93be
+
+* Main Net Information
+    * **Public Address**: 0xe59966672b6853D52A83Bc6Ddbdf341278316166
+    * **Public Ledger**: https://polygonscan.com/address/0xe59966672b6853d52a83bc6ddbdf341278316166
+
+* Smart Contract Repository: https://github.com/nnoromiv/Voote-Contract
 
 ## ✅ Features
 
-* 🔐 **Biometric Authentication**
 * 🪪 **AI-Powered Document Scanning**
 * 🔗 **Immutable Blockchain Voting Ledger**
 * 📱 **Kotlin-Powered Native Mobile Experience**
