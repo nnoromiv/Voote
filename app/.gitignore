@@ -1,2 +1,6 @@
 /build
 google-services.json
+
+# Ignore APKs and build outputs
+*.apk
+/debug
