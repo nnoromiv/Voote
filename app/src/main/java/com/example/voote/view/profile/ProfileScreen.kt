@@ -19,13 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voote.ThisApplication
 import com.example.voote.blockchain.Connector
 import com.example.voote.model.data.KycData
 import com.example.voote.model.data.UserData
@@ -59,9 +58,7 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
     val userName = (userData?.lastName + userData?.walletId?.substring(0, 4)).lowercase()
     val walletBalance = remember { mutableDoubleStateOf(0.0) }
 
-    val context = LocalContext.current
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
-
+    val coroutineScope = rememberCoroutineScope()
 
 
     fun loadData() {

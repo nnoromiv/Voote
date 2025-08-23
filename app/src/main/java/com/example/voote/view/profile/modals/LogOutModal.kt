@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,9 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.example.voote.ThisApplication
 import com.example.voote.navigation.RouteLogin
 import com.example.voote.viewModel.AuthViewModel
 import kotlinx.coroutines.launch
@@ -32,8 +31,7 @@ import com.example.voote.viewModel.UserViewModel
 @Composable
 fun LogOutModal(authManager: AuthViewModel, kycViewModel: KycViewModel, userViewModel: UserViewModel, navController: NavController, sheetState: SheetState, onDismissRequest: () -> Unit) {
 
-    val context = LocalContext.current
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
 
     fun handleLogout() {
         coroutineScope.launch {

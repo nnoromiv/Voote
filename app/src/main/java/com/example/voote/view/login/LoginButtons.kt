@@ -1,6 +1,5 @@
 package com.example.voote.view.login
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -120,9 +119,6 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
 
             isLoading = false
             navController.navigate(RouteHome)
-
-            Log.d("Login", "User: $user, Kyc: $kyc")
-
         }
     }
 

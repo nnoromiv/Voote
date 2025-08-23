@@ -164,8 +164,12 @@ fun HistoryList(context: Context, constant: Constants, history: List<AuditLogEnt
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 onClick = {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
+                    if(data.action == AUDIT.CREATE_ELECTION || data.action == AUDIT.CREATE_CANDIDATE || data.action == AUDIT.VOTE) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                    } else {
+                        // Do Nothing
+                    }
                 }
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {

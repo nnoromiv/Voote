@@ -1,6 +1,7 @@
 package com.example.voote.view.home
 
 import android.Manifest
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +65,7 @@ fun HomeScreen(viewModel : HomeViewModel = viewModel(), kycViewModel: KycViewMod
 
     val isLoading by viewModel.isLoading.collectAsState()
 
-    val isLoggedIn = authManager.isLoggedIn()
+    val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
     val kycCompletionPercentage by kycViewModel.kycCompletionPercentage.collectAsState()
 
     val userAddress = viewModel.userAddress
@@ -91,6 +93,7 @@ fun HomeScreen(viewModel : HomeViewModel = viewModel(), kycViewModel: KycViewMod
     }
 
     LaunchedEffect(isLoggedIn) {
+        Log.d("HomeScreen", "isLoggedIn: $isLoggedIn")
         viewModel.loadData(isLoggedIn)
     }
 
