@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RouteFaceVerification
 import com.example.voote.navigation.RouteHome
 import com.example.voote.navigation.RouteStatus
@@ -34,7 +34,6 @@ import kotlinx.coroutines.launch
 fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
     val isLoading = remember { mutableStateOf(false) }
     val verification = Verification(authManager)
@@ -71,11 +70,11 @@ fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycV
 
         coroutineScope.launch {
 
-            val success = verification.setResidentialAddress(residentialAddress, walletId)
+            val success = verification.setResidentialAddress(residentialAddress)
 
-            if(success.status == Status.ERROR) {
+            if(success.status == STATUS.ERROR) {
                 navController.navigate(RouteStatus(
-                    status = Status.ERROR,
+                    status = STATUS.ERROR,
                     nextScreen = ""
                 ))
 
@@ -84,7 +83,7 @@ fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycV
             }
 
             navController.navigate(RouteStatus(
-                status = Status.SUCCESS,
+                status = STATUS.SUCCESS,
                 nextScreen = RouteFaceVerification("").toJson()
             ))
 

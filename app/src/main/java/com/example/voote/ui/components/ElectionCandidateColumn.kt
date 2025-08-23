@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ElectionCandidateColumn(election : ElectionData?, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, candidates: List<CandidateData>, isDynamic: Boolean = false) {
+fun ElectionCandidateColumn(election : ElectionData?, uid: String, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, candidates: List<CandidateData>, isDynamic: Boolean = false) {
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -93,6 +93,7 @@ fun ElectionCandidateColumn(election : ElectionData?, walletViewModel: WalletVie
     if (showSheet && selectedCandidate != null) {
         CandidateModal(
             election = election,
+            uid = uid,
             walletViewModel = walletViewModel,
             contract = contract,
             userAddress = userAddress,

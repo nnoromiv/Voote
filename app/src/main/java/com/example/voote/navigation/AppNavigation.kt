@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.voote.blockchain.Connector
 import com.example.voote.firebase.auth.Auth
+import com.example.voote.firebase.election.Election
 import com.example.voote.firebase.user.User
 import com.example.voote.view.ImportWalletScreen
 import com.example.voote.view.LoaderScreen
@@ -40,10 +41,14 @@ import com.example.voote.view.scan.ScanQR
 import com.example.voote.view.signup.SignUpScreen
 import com.example.voote.view.signup.TokenVerificationScreen
 import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.HistoryViewModel
+import com.example.voote.viewModel.HomeViewModel
 import com.example.voote.viewModel.IdentityDetailsViewModel
 import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.UserViewModel
 import com.example.voote.viewModel.WalletViewModel
+import com.example.voote.viewModel.factory.HistoryViewModelFactory
+import com.example.voote.viewModel.factory.HomeViewModelFactory
 import com.example.voote.viewModel.factory.UserViewModelFactory
 import com.example.voote.wallet.WalletManager
 import java.io.File
@@ -60,6 +65,19 @@ fun AppNavigation() {
         factory = UserViewModelFactory(context.applicationContext as Application)
     )
     val identityDetailsViewModel: IdentityDetailsViewModel = remember { IdentityDetailsViewModel() }
+    val homeViewModel : HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            election = Election(),
+            userViewModel = userViewModel,
+            walletViewModel = walletViewModel
+        )
+    )
+
+    val historyViewModel : HistoryViewModel = viewModel(
+        factory = HistoryViewModelFactory(
+            userViewModel = userViewModel
+        )
+    )
 
     val connector = Connector(walletViewModel)
     val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
@@ -106,12 +124,17 @@ fun AppNavigation() {
         val getData = User(uid)
 
         val user = getData.getUser()
-        val kyc = getData.getKycData()
-
         if(user == null) {
             Toast.makeText(context, "Error getting user", Toast.LENGTH_SHORT).show()
             return
         }
+
+        if(user.walletId.isEmpty()) {
+            navController.navigate(RoutePersonalVerification)
+            return
+        }
+
+        val kyc = getData.getKycData(user.walletId)
 
         userViewModel.setUserData(user)
         kycViewModel.setKycData(kyc)
@@ -187,7 +210,7 @@ fun AppNavigation() {
         }
 
         composable<RouteHome>{
-            HomeScreen(userViewModel, kycViewModel, authManager, walletViewModel, navController)
+            HomeScreen(homeViewModel, kycViewModel, authManager, walletViewModel, navController)
         }
 
         composable<RouteElections>{
@@ -199,7 +222,7 @@ fun AppNavigation() {
         }
 
         composable<RouteHistory> {
-            HistoryScreen(authManager, walletViewModel, navController)
+            HistoryScreen(historyViewModel, authManager, walletViewModel, navController)
         }
 
         composable<RouteProfile> {

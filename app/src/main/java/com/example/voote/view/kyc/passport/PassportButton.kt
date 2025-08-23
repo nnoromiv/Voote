@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.STATUS
+import com.example.voote.firebase.user.User
 import com.example.voote.navigation.RouteDriverLicenceVerification
 import com.example.voote.navigation.RouteHome
 import com.example.voote.navigation.RouteScanID
@@ -30,8 +32,6 @@ fun PassportButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navCo
 
     val isLoading = remember { mutableStateOf(true) }
     val verification = Verification(authManager)
-//    val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     val kycData by kycViewModel.kycData.collectAsState()
@@ -39,6 +39,7 @@ fun PassportButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navCo
     val passportExpiryDate by kycViewModel.passportExpiryDate.collectAsState()
     val isIdError by kycViewModel.isIdError.collectAsState()
     val idErrorMessage by kycViewModel.idErrorMessage.collectAsState()
+    val uid = authManager.userUid().toString()
 
     val errorExist = idErrorMessage.isNotEmpty() || isIdError || passportNumber.isEmpty() || passportExpiryDate.isEmpty()
 
@@ -48,8 +49,10 @@ fun PassportButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navCo
         coroutineScope.launch {
             val result = verification.saveDocumentNumbers(passportNumber, passportExpiryDate, null, null)
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
                 isLoading.value = false
+
+                User(uid).writeAuditLog(AUDIT.KYC, STATUS.ERROR, "Passport details saved")
 
                 navController.navigate(RouteStatus(
                     status = result.status,
@@ -58,6 +61,8 @@ fun PassportButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navCo
 
                 return@launch
             }
+
+            User(uid).writeAuditLog(AUDIT.KYC, STATUS.SUCCESS, "Passport details saved")
 
             navController.navigate(RouteStatus(
                 status = result.status,

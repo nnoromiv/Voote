@@ -43,7 +43,7 @@ fun NoHistory() {
             )
 
             Text(
-                "Make a Transaction",
+                "Do Something",
                 fontSize = 18
             )
 

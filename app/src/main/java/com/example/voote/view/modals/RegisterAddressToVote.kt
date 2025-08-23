@@ -30,9 +30,9 @@ import com.example.voote.viewModel.ElectionViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.example.voote.ThisApplication
 import com.example.voote.firebase.election.Election
 import com.example.voote.firebase.user.User
 import com.example.voote.model.data.ElectionData
@@ -58,6 +58,7 @@ fun RegisterAddressToVote(authManager: AuthViewModel, sheetState: SheetState, on
     var selectedElectionId by remember { mutableStateOf<Int?>(null) }
     var selectedId by remember { mutableStateOf<String?>(null) }
     val electionData  = remember { mutableListOf<ElectionData>() }
+    val coroutineScope = rememberCoroutineScope()
 
     val uid = authManager.userUid().toString()
     val user = User(uid)
@@ -69,7 +70,7 @@ fun RegisterAddressToVote(authManager: AuthViewModel, sheetState: SheetState, on
         val result = user.getUserElections(onlyActiveElections = true)
 
         if (result.isEmpty()) {
-            Log.d("Firestore", "User has no elections")
+            Log.d("RegisterAddressToVote", "User has no elections")
             isLoading.value = false
             return@LaunchedEffect
         }
@@ -78,7 +79,6 @@ fun RegisterAddressToVote(authManager: AuthViewModel, sheetState: SheetState, on
         isLoading.value = false
     }
 
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
 
     fun onCandidateAddressChange(value: String) {
         val isValid = isValidBlockchainAddress(value.trim())
@@ -127,6 +127,16 @@ fun RegisterAddressToVote(authManager: AuthViewModel, sheetState: SheetState, on
         containerColor = Color.White,
         modifier = Modifier.wrapContentHeight()
     ) {
+        if(isLoading.value){
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Loader()
+            }
+        } else {
             if(electionData.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -191,6 +201,7 @@ fun RegisterAddressToVote(authManager: AuthViewModel, sheetState: SheetState, on
                         )
                     }
                 }
+            }
         }
     }
 }

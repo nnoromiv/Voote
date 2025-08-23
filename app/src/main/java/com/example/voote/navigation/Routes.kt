@@ -1,6 +1,6 @@
 package com.example.voote.navigation
 
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -91,7 +91,7 @@ object RouteScanFace : AppRoute
 @Serializable
 @SerialName("RouteStatus")
 data class RouteStatus (
-    val status: Status,
+    val status: STATUS,
     val nextScreen: String? = ""
 ) : AppRoute
 

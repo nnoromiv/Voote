@@ -28,6 +28,7 @@ class Constants {
     val txHashUrl = "https://sepolia.etherscan.io/"
 
     val vooteContractAddress = "0x43dBDd94d852a7a0cce8996447Ab74De0B8D93BE"
+
     val rpcUrl = "https://eth-sepolia.g.alchemy.com/v2/FnpKmFie5JVqo8Rwgso0veb6UzKUpSDu"
 
 }

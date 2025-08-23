@@ -24,71 +24,64 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.composables.icons.lucide.LayoutDashboard
 import com.composables.icons.lucide.ListPlus
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Vote
-import com.example.voote.ThisApplication
 import com.example.voote.contract.Voote
-import com.example.voote.firebase.election.Election
-import com.example.voote.model.data.CandidateData
-import com.example.voote.model.data.ElectionData
 import com.example.voote.ui.components.BottomNavigation
 import com.example.voote.ui.components.CountDown
 import com.example.voote.ui.components.ElectionsWithCandidatesSection
 import com.example.voote.ui.components.KYCReminder
-import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.ProfileBar
 import com.example.voote.ui.components.Text
-import com.example.voote.utils.helpers.getElectionWithEarliestEndDate
 import com.example.voote.view.LoaderScreen
 import com.example.voote.view.modals.CreateElectionModal
 import com.example.voote.view.modals.RegisterAddressToVote
 import com.example.voote.view.modals.RegisterCandidate
 import com.example.voote.view.modals.UserAddressQR
 import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.HomeViewModel
 import com.example.voote.viewModel.KycViewModel
-import com.example.voote.viewModel.UserViewModel
 import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.launch
 
 @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authManager: AuthViewModel, walletViewModel: WalletViewModel, navController: NavController) {
+fun HomeScreen(viewModel : HomeViewModel = viewModel(), kycViewModel: KycViewModel, authManager: AuthViewModel, walletViewModel: WalletViewModel, navController: NavController) {
+
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val isLoggedIn = authManager.isLoggedIn()
     val kycCompletionPercentage by kycViewModel.kycCompletionPercentage.collectAsState()
-    var userAddress by remember { mutableStateOf<String?>("") }
-    var name by remember { mutableStateOf<String?>(null) }
-    var userName by remember { mutableStateOf<String?>(null) }
-    val isLoading = remember { mutableStateOf(false) }
+
+    val userAddress = viewModel.userAddress
+    val name = viewModel.name
+    val userName = viewModel.userName
 
     val contract = authManager.contract.collectAsState().value
-    val walletData by walletViewModel.walletData.collectAsState()
 
-    val election = Election()
-    val allElectionData  = remember { mutableStateListOf<ElectionData>() }
-    val candidatesMap = remember { mutableStateMapOf<String, List<CandidateData>>() }
-    val cardData = remember { mutableStateOf<ElectionData?>(null) }
+    val allElectionData  by viewModel.allElectionData.collectAsState()
+    val candidatesMap by viewModel.candidatesMap.collectAsState()
+    val cardData by viewModel.cardData.collectAsState()
 
     val userAddressQRSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val context = LocalContext.current
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
     var userAddressShowState by remember { mutableStateOf(false) }
 
     var isRefreshing by remember { mutableStateOf(false) }
+
 
     fun handleUserAddressQR() {
         userAddressShowState = true
@@ -97,44 +90,11 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
         }
     }
 
-    suspend fun loadData() {
-        if (!isLoggedIn) {
-            return
-        }
-        isLoading.value = true
-        userAddress = walletData?.address.toString()
-
-        val userData = userViewModel.userData.value
-
-        name = userData?.firstName + " " + userData?.lastName
-        userName = (userData?.lastName + userData?.uid?.substring(0, 4)).lowercase()
-
-        val result = election.getRandomFiveElections()
-
-        allElectionData.clear()
-        candidatesMap.clear()
-        if (result.isNotEmpty()) {
-            allElectionData.addAll(result)
-            for (elections in result) {
-                val candidates = election.getCandidatesForElection(elections.id)
-                candidatesMap[elections.id] = candidates
-            }
-        }
-
-        val forElectionCard = election.getAllElections()
-        cardData.value = getElectionWithEarliestEndDate(forElectionCard)
-
-        isLoading.value = false
+    LaunchedEffect(isLoggedIn) {
+        viewModel.loadData(isLoggedIn)
     }
 
-    LaunchedEffect(true) {
-        loadData()
-    }
-
-//    fun goOutDebug() {
-//        navController.navigate(RouteScanFace)
-//    }
-    val isBlockChainRequirementsLoaded = userAddress != null && contract != null && !isLoading.value
+    val isBlockChainRequirementsLoaded = userAddress != null && contract != null && !isLoading
 
     if(!isBlockChainRequirementsLoaded) {
         LoaderScreen()
@@ -149,7 +109,7 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
                 onRefresh = {
                     coroutineScope.launch {
                         isRefreshing = true
-                        loadData()
+                        viewModel.loadData(isLoggedIn)
                         isRefreshing = false
                     }
                 }
@@ -163,10 +123,6 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
                         .padding(10.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    if (isLoading.value) {
-                        Loader()
-                    }
-
                     ProfileBar(
                         name.toString(),
                         userName.toString(),
@@ -178,14 +134,7 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
                         navController,
                     )
 
-//                    PrimaryButton(
-//                        text = "DEBUG",
-//                        onClick = {
-//                            goOutDebug()
-//                        }
-//                    )
-
-                    cardData.value?.let {
+                    cardData?.let {
                         CountDown(
                             text = it.title,
                             endTime = it.endTime,
@@ -215,7 +164,7 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
 
                     if (userAddressShowState) {
                         UserAddressQR(
-                            userAddress!!,
+                            userAddress,
                             sheetState = userAddressQRSheetState,
                             onDismissRequest = {
                                 userAddressShowState = false
@@ -235,8 +184,7 @@ fun HomeScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, authMan
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElectionActionButtons(contract: Voote, userAddress: String?, authManager: AuthViewModel, walletViewModel: WalletViewModel) {
-    val context = LocalContext.current
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
 
     val createElectionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var createElectionShowSheet by remember { mutableStateOf(false) }
@@ -342,7 +290,10 @@ fun ElectionActionButtons(contract: Voote, userAddress: String?, authManager: Au
             authManager,
             sheetState = registerAddressSheetState,
             onDismissRequest = {
-                registerAddressShowSheet = false
+                coroutineScope.launch {
+                    registerAddressSheetState.hide()
+                    registerAddressShowSheet = false
+                }
             }
         )
     }
@@ -355,7 +306,10 @@ fun ElectionActionButtons(contract: Voote, userAddress: String?, authManager: Au
             walletViewModel,
             sheetState = createElectionSheetState,
             onDismissRequest = {
-                createElectionShowSheet = false
+                coroutineScope.launch {
+                    createElectionSheetState.hide()
+                    createElectionShowSheet = false
+                }
             }
         )
     }
@@ -368,7 +322,10 @@ fun ElectionActionButtons(contract: Voote, userAddress: String?, authManager: Au
             walletViewModel,
             sheetState = registerCandidateSheetState,
             onDismissRequest = {
-                registerCandidateShowSheet = false
+                coroutineScope.launch {
+                    registerCandidateSheetState.hide()
+                    registerCandidateShowSheet = false
+                }
             }
         )
     }

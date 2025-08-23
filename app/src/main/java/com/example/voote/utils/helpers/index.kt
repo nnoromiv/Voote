@@ -61,7 +61,7 @@ import com.google.zxing.EncodeHintType
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
 import androidx.core.net.toUri
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.model.data.ElectionData
 import java.time.Instant
 import java.time.LocalDate
@@ -226,15 +226,6 @@ fun generateHMAC(message: String, secretKey: SecretKey) : String {
     return Base64.encodeToString(hmacBytes, Base64.URL_SAFE).trim()
 }
 
-fun verifyHMAC(message: String, hmac: String, secretKey: SecretKey): Boolean {
-    val mac = Mac.getInstance("HmacSHA256")
-    mac.init(secretKey)
-    val computedHmac = mac.doFinal(message.toByteArray())
-    val providedHmac = Base64.decode(hmac, Base64.URL_SAFE)
-
-    return computedHmac.contentEquals(providedHmac)
-}
-
 fun convertLongToDate(timeStamp: Long, pattern: String = "dd/MM/yyyy"): String {
     if(timeStamp == 0L) return ""
 
@@ -325,7 +316,7 @@ suspend fun handleCaptureIdSuspend(imageCapture: ImageCapture, executor: Executo
                             "id_${System.currentTimeMillis()}.jpg"
                         )
 
-                        if (savedImageUri.status == Status.ERROR) {
+                        if (savedImageUri.status == STATUS.ERROR) {
                             Log.e("ImageCapture", "Error saving image: ${savedImageUri.message}")
                         }
 

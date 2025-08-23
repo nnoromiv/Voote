@@ -35,6 +35,7 @@ fun ElectionsWithCandidatesSection(elections: List<ElectionData>, candidatesMap:
 
     var userAddress by remember { mutableStateOf<String?>("") }
 
+    val uid = authManager.userUid().toString()
     val contract = authManager.contract.collectAsState().value
     val walletData by walletViewModel.walletData.collectAsState()
 
@@ -79,6 +80,7 @@ fun ElectionsWithCandidatesSection(elections: List<ElectionData>, candidatesMap:
                 // Show candidates for this election
                 ElectionCandidateColumn(
                     election,
+                    uid,
                     walletViewModel,
                     contract = contract!!,
                     userAddress = userAddress,

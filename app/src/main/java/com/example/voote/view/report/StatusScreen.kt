@@ -20,30 +20,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.navigation.toAppRoute
 
 @Composable
-fun StatusScreen(status: Status, nextScreen: String? = "", navController: NavController) {
+fun StatusScreen(status: STATUS, nextScreen: String? = "", navController: NavController) {
 
     val color = when (status) {
-        Status.SUCCESS -> Color(0xFF00BA11)
-        Status.ERROR -> Color.Red
-//        Status.PENDING -> Color.Yellow
+        STATUS.SUCCESS -> Color(0xFF00BA11)
+        STATUS.ERROR -> Color.Red
     }
 
     val text = when (status) {
-        Status.SUCCESS -> "Business Handled"
-        Status.ERROR -> "Error while handling business"
-//        Status.PENDING -> "Task Pending"
+        STATUS.SUCCESS -> "Business Handled"
+        STATUS.ERROR -> "Error while handling business"
     }
 
     val imageVector = when (status) {
-        Status.SUCCESS -> Icons.Outlined.Done
-        Status.ERROR -> Icons.Outlined.Error
-//        Status.PENDING -> Icons.Outlined.Pending
+        STATUS.SUCCESS -> Icons.Outlined.Done
+        STATUS.ERROR -> Icons.Outlined.Error
     }
 
     fun handleClick() {

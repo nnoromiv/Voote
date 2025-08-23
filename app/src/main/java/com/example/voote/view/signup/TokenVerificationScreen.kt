@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Auth
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RoutePersonalVerification
 import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Loader
@@ -46,7 +46,6 @@ fun TokenVerificationScreen(phoneNumber: String, navController: NavController) {
     val activity = LocalActivity.current as Activity
     var isLoading by remember { mutableStateOf(false) }
     var isTokenResendLoading by remember { mutableStateOf(false) }
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     val tokenVerificationViewModel: TokenVerificationViewModel = viewModel()
@@ -111,7 +110,7 @@ fun TokenVerificationScreen(phoneNumber: String, navController: NavController) {
             Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
             isLoading = false
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
                 Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
                 return@launch
             }

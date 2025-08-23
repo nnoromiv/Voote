@@ -8,7 +8,6 @@ import com.example.voote.model.data.PassportExtractedData
 import com.example.voote.model.data.WalletIdData
 import com.example.voote.utils.helpers.generateHMAC
 import com.example.voote.utils.helpers.getOrCreateHMACKey
-import com.example.voote.utils.helpers.verifyHMAC
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.WalletViewModel
 import com.google.firebase.Firebase
@@ -23,7 +22,7 @@ class Verification(authManager: AuthViewModel) {
 
     val uid = authManager.userUid().toString()
     val userRef = db.collection("users").document(uid)
-    private fun kycRef(walletId: String) = userRef.collection("kyc").document(walletId)
+    val kycRef = userRef.collection("kyc").document("wallet")
 
     suspend fun checkOrSaveWalletId(walletId: String?, walletViewModel: WalletViewModel) : AppResult<WalletIdData> {
 
@@ -32,29 +31,23 @@ class Verification(authManager: AuthViewModel) {
         val key = getOrCreateHMACKey()
 
         return try {
-            val computedId = generateHMAC(uid + address, key)
+            val computedId = generateHMAC(uid + address, key).trim()
             if(walletId.isNullOrEmpty()) {
-                createKycDocument(computedId)
+                createKycDocument()
                 userRef.update("walletId", computedId).await()
                 return AppResult.Success("Wallet ID saved",  WalletIdData(computedId))
             }
 
-            return if (!verifyHMAC(uid + address, walletId, key)) {
-                renameDocument(walletId, computedId)
-                AppResult.Success("Wallet ID renamed", WalletIdData(computedId))
-            } else {
-                AppResult.Success("Wallet still valid", WalletIdData(walletId))
-            }
+            AppResult.Success("Wallet still valid", WalletIdData(walletId))
         } catch (e: Exception) {
             Log.e("WalletID", "Error saving/checking wallet ID", e)
             AppResult.Error("Exception: ${e.localizedMessage}")
         }
     }
 
-    suspend fun createKycDocument(walletId: String) {
+    suspend fun createKycDocument() {
         try {
-            val ref = kycRef(walletId)
-            val hasRef = ref.get().await()
+            val hasRef = kycRef.get().await()
 
             if (hasRef.exists()) return
 
@@ -70,7 +63,7 @@ class Verification(authManager: AuthViewModel) {
                 "lastUpdated" to System.currentTimeMillis()
             )
 
-            ref.set(kycMap).await()
+            kycRef.set(kycMap).await()
         } catch (e: Exception) {
             Log.e("KYC", "Failed to create KYC document", e)
             throw e
@@ -100,7 +93,6 @@ class Verification(authManager: AuthViewModel) {
             }
 
                 // Save URL to Firestore
-            val kycRef = kycRef(existingWalletId)
             kycRef.update(fileName, downloadUrl.toString()).await()
 
             AppResult.Success("Image uploaded successfully")
@@ -118,7 +110,6 @@ class Verification(authManager: AuthViewModel) {
             val walletId = hasRef.getString("walletId")
             if (walletId.isNullOrBlank()) return AppResult.Error("Wallet ID does not exist")
 
-            val kycRef = kycRef(walletId)
             val updates = mutableMapOf<String, Any>()
             passportNumber?.takeIf { it.isNotBlank() }?.let { updates["passportNumber"] = it }
             passportExpiryDate?.takeIf { it.isNotBlank() }?.let { updates["passportExpiryDate"] = it }
@@ -135,36 +126,9 @@ class Verification(authManager: AuthViewModel) {
         }
     }
 
-    suspend fun renameDocument( oldDocId: String, newDocId: String ) {
-        val oldDocRef = kycRef(oldDocId)
-        val newDocRef = kycRef(newDocId)
-
-        try {
-            val documentSnapshot = oldDocRef.get().await()
-            if (!documentSnapshot.exists()) {
-                throw Exception("Old document does not exist")
-            }
-
-            val data = documentSnapshot.data
-                ?: throw Exception("Old document has no data")
-
-            db.runBatch { batch ->
-                batch.set(newDocRef, data)
-                batch.delete(oldDocRef)
-                batch.update(userRef, "walletId", newDocId)
-            }.await()
-
-            Log.d("Firestore", "Document renamed and walletId updated successfully")
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error renaming document", e)
-            throw e // or handle error accordingly
-        }
-    }
-
-    suspend fun setResidentialAddress(address: String, walletId: String): AppResult<Any> {
+    suspend fun setResidentialAddress(address: String): AppResult<Any> {
         return try {
-            kycRef(walletId)
-                .update("residentialAddress", address).await()
+            kycRef.update("residentialAddress", address).await()
             AppResult.Success("Residential address updated")
         } catch (e: Exception) {
             Log.e("Firestore", "Failed to update address", e)

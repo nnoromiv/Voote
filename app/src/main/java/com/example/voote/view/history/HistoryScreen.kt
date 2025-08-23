@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,54 +35,49 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voote.firebase.data.TAG
-import com.example.voote.firebase.user.User
-import com.example.voote.model.data.ElectionData
 import com.example.voote.ui.components.BottomNavigation
 import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.Text
 import com.example.voote.utils.Constants
-import com.example.voote.utils.helpers.convertLongToDate
-import com.example.voote.viewModel.AuthViewModel
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.composables.icons.lucide.Blocks
+import com.composables.icons.lucide.DoorOpen
 import com.composables.icons.lucide.History
+import com.composables.icons.lucide.LayoutDashboard
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.PersonStanding
+import com.composables.icons.lucide.ShieldQuestion
 import com.composables.icons.lucide.Vote
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.AuditLogEntry
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.utils.helpers.openWebsite
+import com.example.voote.viewModel.AuthViewModel
+import com.example.voote.viewModel.HistoryViewModel
 import com.example.voote.viewModel.WalletViewModel
 
 @Composable
-fun HistoryScreen(authManager: AuthViewModel, walletViewModel: WalletViewModel, navController: NavController) {
+fun HistoryScreen(viewModel: HistoryViewModel = viewModel(), authManager: AuthViewModel, walletViewModel: WalletViewModel, navController: NavController) {
+
+    val history by viewModel.auditLogs.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    val isLoggedIn = authManager.isLoggedIn()
 
     val context = LocalContext.current
     val constant = Constants()
-    val uid = authManager.userUid().toString()
-    val user = User(uid)
-    val electionData  = remember { mutableListOf<ElectionData?>() }
-    val isLoading = remember { mutableStateOf(false) }
 
     var userBlockchainUrl by remember { mutableStateOf<String?>("") }
 
     val walletData by walletViewModel.walletData.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(isLoggedIn) {
+        viewModel.loadFirst50AuditLogs(isLoggedIn)
         userBlockchainUrl = constant.txHashUrl + "address/" + walletData?.address.toString()
     }
 
-    LaunchedEffect(Unit) {
-        isLoading.value = true
-        val result = user.getUserElections()
-
-        if (result.isEmpty()) {
-            Log.d("Firestore", "User has no elections")
-            isLoading.value = false
-            return@LaunchedEffect
-        }
-
-        electionData.addAll(result)
-        isLoading.value = false
-    }
+    Log.d("HistoryScreen", "User Blockchain URL: $history")
 
     Scaffold (
         bottomBar = { BottomNavigation(navController) }
@@ -98,10 +91,10 @@ fun HistoryScreen(authManager: AuthViewModel, walletViewModel: WalletViewModel, 
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            if(isLoading.value) {
+            if(isLoading) {
                 Loader()
             } else {
-                if(electionData.isEmpty()) {
+                if(history.isEmpty()) {
                     NoHistory()
                 } else {
                     Row(
@@ -126,7 +119,7 @@ fun HistoryScreen(authManager: AuthViewModel, walletViewModel: WalletViewModel, 
                             )
                         }
                     }
-                    HistoryList(context, constant, electionData)
+                    HistoryList(context, constant, history)
                 }
             }
         }
@@ -134,43 +127,37 @@ fun HistoryScreen(authManager: AuthViewModel, walletViewModel: WalletViewModel, 
 }
 
 @Composable
-fun HistoryList(context: Context, constant: Constants, electionData: List<ElectionData?>) {
+fun HistoryList(context: Context, constant: Constants, history: List<AuditLogEntry>) {
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        items(electionData.count()) { election ->
+        items(history.count()) { logs ->
 
-            val data = electionData[election] ?: return@items
-            val currentTime = System.currentTimeMillis()
+            val data = history[logs]
 
-            val color = when {
-                currentTime < data.startTime -> Color.Red
-                currentTime in data.startTime..data.endTime -> Color.Yellow
-                else -> Color.Green
+            val color = when(data.status) {
+                STATUS.ERROR  -> Color.Red
+                STATUS.SUCCESS -> Color.Green
             }
 
-            val start = if (currentTime < data.startTime) {
-                "Starts - ${convertLongToDate(data.startTime)}"
-            } else {
-                "Started - ${convertLongToDate(data.startTime)}"
+            val imageVector = when(data.action) {
+                AUDIT.CREATE_ELECTION -> Lucide.Blocks
+                AUDIT.CREATE_CANDIDATE -> Lucide.PersonStanding
+                AUDIT.VOTE -> Lucide.Vote
+                AUDIT.LOGIN -> Lucide.DoorOpen
+                AUDIT.KYC -> Lucide.LayoutDashboard
+                AUDIT.NONE -> Lucide.ShieldQuestion
             }
 
-            val end = if (currentTime < data.endTime) {
-                "Ends - ${convertLongToDate(data.endTime)}"
-            } else {
-                "Ended - ${convertLongToDate(data.endTime)}"
+            val url = if(data.action == AUDIT.CREATE_ELECTION || data.action == AUDIT.CREATE_CANDIDATE || data.action == AUDIT.VOTE) {
+                constant.txHashUrl + "tx/" + data.details
+            } else{
+                null
             }
 
-            val imageVector = when(data.tag) {
-                TAG.ELECTION -> Lucide.Blocks
-                TAG.VOTE -> Lucide.Vote
-                else -> Icons.Default.Home
-            }
-
-            val url = constant.txHashUrl + "tx/" + data.transactionHash
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            val intent = Intent(Intent.ACTION_VIEW, url?.toUri())
 
             Card(
                 modifier = Modifier
@@ -202,7 +189,7 @@ fun HistoryList(context: Context, constant: Constants, electionData: List<Electi
                                 )
 
                                 Text(
-                                    data.title,
+                                    data.action.toString().replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20
                                 )
@@ -221,23 +208,6 @@ fun HistoryList(context: Context, constant: Constants, electionData: List<Electi
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            start,
-                            fontSize = 12,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Text(
-                            end,
-                            fontSize = 12,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
                 }
             }
         }

@@ -20,7 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RouteAddressVerification
 import com.example.voote.navigation.RouteDriverLicenceVerification
 import com.example.voote.navigation.RouteStatus
@@ -75,7 +75,7 @@ fun IDPermissionGranted (context: Context, authManager: AuthViewModel, identityD
 
             isLoading.value = false
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
 
                 navController.navigate(RouteStatus(
                     status = result.status,

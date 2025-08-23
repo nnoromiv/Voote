@@ -24,7 +24,7 @@ import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.UserViewModel
 import androidx.compose.runtime.getValue
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RouteSignup
 import com.example.voote.viewModel.WalletViewModel
 
@@ -45,7 +45,7 @@ fun PersonalVerificationScreen(authViewModel: AuthViewModel, userViewModel: User
 
         val result = verification.checkOrSaveWalletId(walletId, walletViewModel)
 
-        if(result.status == Status.ERROR){
+        if(result.status == STATUS.ERROR){
             Log.e("PersonalVerification", "Error checking or saving wallet ID", Exception(result.message))
             return@LaunchedEffect
         }

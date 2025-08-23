@@ -31,7 +31,6 @@ import com.example.voote.model.data.KycData
 import com.example.voote.model.data.UserData
 import com.example.voote.ui.components.BottomNavigation
 import com.example.voote.ui.components.CountDown
-import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.ProfileBar
 import com.example.voote.ui.components.Text
 import com.example.voote.view.profile.modals.LogOutModal
@@ -116,14 +115,14 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
             )
 
             VerificationInformation(
-                userData!!,
-                kycData!!
+                userData,
+                kycData
             )
 
-            PrimaryButton(
-                text = "Back Up Wallet",
-                onClick = { /*TODO*/ },
-            )
+//            PrimaryButton(
+//                text = "Back Up Wallet",
+//                onClick = { /*TODO*/ },
+//            )
 
         }
 
@@ -162,30 +161,32 @@ fun DisplayInformation(title: String, value: String) {
 }
 
 @Composable
-fun VerificationInformation(userData: UserData, kycData: KycData) {
-
+fun VerificationInformation(userData: UserData?, kycData: KycData?) {
     HorizontalDivider()
 
-    DisplayInformation(
-        title = "Email",
-        value = userData.email
-    )
+    if (userData != null) {
+        DisplayInformation(
+            title = "Email",
+            value = userData.email
+        )
 
-    DisplayInformation(
-        title = "Phone Number",
-        value = userData.phoneNumber
-    )
+        DisplayInformation(
+            title = "Phone Number",
+            value = userData.phoneNumber
+        )
+    }
 
-    DisplayInformation(
-        title = "Passport",
-        value = kycData.passportNumber
-    )
+    if (kycData != null) {
+        DisplayInformation(
+            title = "Passport",
+            value = kycData.passportNumber
+        )
 
-    DisplayInformation(
-        title = "Driver's License",
-        value = kycData.driverLicenceNumber
-    )
+        DisplayInformation(
+            title = "Driver's License",
+            value = kycData.driverLicenceNumber
+        )
+    }
 
     HorizontalDivider()
-
 }

@@ -27,7 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RouteImportWallet
 import com.example.voote.navigation.RouteMain
 import com.example.voote.navigation.RouteStatus
@@ -45,7 +45,6 @@ fun MainButton(walletViewModel: WalletViewModel, navController: NavController) {
 
     val isLoading = remember { mutableStateOf(false) }
     val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     val walletManager = WalletManager(context)
@@ -69,7 +68,7 @@ fun MainButton(walletViewModel: WalletViewModel, navController: NavController) {
             isLoading.value = false
 
             navController.navigate(RouteStatus(
-                status = Status.SUCCESS,
+                status = STATUS.SUCCESS,
                 nextScreen = RouteMain.toJson()
             ))
         }

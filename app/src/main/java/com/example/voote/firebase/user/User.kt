@@ -2,12 +2,16 @@ package com.example.voote.firebase.user
 
 import android.net.Uri
 import android.util.Log
+import com.example.voote.firebase.data.AUDIT
 import com.example.voote.firebase.data.AppResult
+import com.example.voote.firebase.data.AuditLogEntry
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.data.TAG
 import com.example.voote.model.data.ElectionData
 import com.example.voote.model.data.KycData
 import com.example.voote.model.data.UserData
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -19,6 +23,8 @@ class User(uid: String) {
     val userRef = db.collection("users").document(uid)
     val electionRef = db.collection("elections")
     val candidateRef = db.collection("candidates")
+    val auditLogRef = db.collection("auditLog").document(uid).collection("logs")
+
     val storageRef = FirebaseStorage.getInstance().reference
 
     suspend fun getUser(): UserData? {
@@ -46,16 +52,12 @@ class User(uid: String) {
         }
     }
 
-    suspend fun getKycData(): KycData? {
+    suspend fun getKycData(walletId: String): KycData? {
         return try {
-            val userSnapshot = userRef.get().await()
-            if (!userSnapshot.exists()) {
-                Log.w("Firestore", "User document not found")
-                return null
-            }
+            val kycSnapshot = userRef.collection("kyc").document("wallet").get().await()
 
-            val walletId = userSnapshot.getString("walletId")?.takeIf { it.isNotBlank() } ?: return null
-            val kycSnapshot = userRef.collection("kyc").document(walletId).get().await()
+            Log.d("APP_NAVIGATION", "Fetching KYC data for walletId: $walletId, ${kycSnapshot.exists()}")
+
 
             if (!kycSnapshot.exists()) {
                 Log.w("Firestore", "KYC document not found for walletId: $walletId")
@@ -162,7 +164,7 @@ class User(uid: String) {
     }
 
     suspend fun uploadCandidateImage(id: String, imageUri: Uri, fileName: String): AppResult<Any> {
-        return try {
+        try {
             val imageRef = storageRef.child("candidates/$id/$fileName.jpg")
 
             // Upload file
@@ -183,11 +185,57 @@ class User(uid: String) {
             // Save URL to Firestore
             candidateRef.document(candidateId).update("candidateImageUrl", downloadUrl.toString()).await()
 
-            AppResult.Success("Image uploaded successfully")
+            return AppResult.Success("Image uploaded successfully")
         } catch (e: Exception) {
             Log.e("UploadImage", "Error uploading image", e)
-            AppResult.Error("Failed to upload image: ${e.localizedMessage}")
+            return AppResult.Error("Failed to upload image: ${e.localizedMessage}")
         }
     }
 
+    suspend fun writeAuditLog(action: AUDIT, status: STATUS,  details: String? = null): Boolean {
+        return try {
+            val logEntry = AuditLogEntry(action, status, details)
+
+            auditLogRef
+                .add(logEntry)
+                .await()
+
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun getFirst50AuditLogs(): List<AuditLogEntry> {
+        return try {
+            val snapshot = auditLogRef
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .limit(50)
+                .get()
+                .await()
+
+            if (snapshot.isEmpty) {
+                return emptyList()
+            }
+
+            snapshot.documents.mapNotNull { doc ->
+                val actionStr = doc.getString("action") ?: "NONE"
+                val statusStr = doc.getString("status") ?: "ERROR"
+                val details = doc.getString("details")
+                val timestamp = doc.getTimestamp("timestamp")
+
+                AuditLogEntry(
+                    action = try { AUDIT.valueOf(actionStr) } catch (_: Exception) { AUDIT.NONE },
+                    status = try { STATUS.valueOf(statusStr) } catch (_: Exception) { STATUS.ERROR },
+                    details = details,
+                    timestamp = timestamp
+                )
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
 }

@@ -24,7 +24,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.R
 import com.example.voote.firebase.auth.Auth
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.user.User
 import com.example.voote.navigation.RouteHome
 import com.example.voote.navigation.RoutePersonalVerification
@@ -54,7 +55,6 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
     var isLoading by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     fun login() {
@@ -64,7 +64,7 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
         coroutineScope.launch {
             val result = auth.logIn(email, password)
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
                 Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
                 isLoading = false
                 return@launch
@@ -79,15 +79,23 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
             }
 
             val getData = User(uid)
+            getData.writeAuditLog(AUDIT.LOGIN, STATUS.SUCCESS, "Logged In")
 
             val user = getData.getUser()
-            val kyc = getData.getKycData()
 
             if(user == null) {
                 Toast.makeText(context, "Error getting user", Toast.LENGTH_SHORT).show()
                 isLoading = false
                 return@launch
             }
+
+            if(user.walletId.isEmpty()) {
+                navController.navigate(RoutePersonalVerification)
+                isLoading = false
+                return@launch
+            }
+
+            val kyc = getData.getKycData(user.walletId)
 
             userViewModel.setUserData(user)
             kycViewModel.setKycData(kyc)

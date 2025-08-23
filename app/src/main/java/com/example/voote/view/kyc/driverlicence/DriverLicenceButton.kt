@@ -1,6 +1,5 @@
 package com.example.voote.view.kyc.driverlicence
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.STATUS
+import com.example.voote.firebase.user.User
 import com.example.voote.navigation.RouteAddressVerification
 import com.example.voote.navigation.RouteHome
 import com.example.voote.navigation.RouteScanID
@@ -31,14 +32,13 @@ fun DriverLicenceButtons(authManager: AuthViewModel, kycViewModel: KycViewModel,
 
     val isLoading = remember { mutableStateOf(false) }
     val verification = Verification(authManager)
-//    val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
     val kycData by kycViewModel.kycData.collectAsState()
     val driverLicenceNumber by kycViewModel.driverLicenceNumber.collectAsState()
     val driverLicenceExpiryDate by kycViewModel.driverLicenceExpiryDate.collectAsState()
     val isIdError by kycViewModel.isIdError.collectAsState()
     val idErrorMessage by kycViewModel.idErrorMessage.collectAsState()
+    val uid = authManager.userUid().toString()
 
     val errorExist = idErrorMessage.isNotEmpty() || isIdError || driverLicenceNumber.isEmpty() || driverLicenceExpiryDate.isEmpty()
 
@@ -47,10 +47,10 @@ fun DriverLicenceButtons(authManager: AuthViewModel, kycViewModel: KycViewModel,
 
         coroutineScope.launch {
             val result = verification.saveDocumentNumbers(null, null, driverLicenceNumber, driverLicenceExpiryDate)
-            Log.d("DriverLicenceButtons", "Result: $result")
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
                 isLoading.value = false
+                User(uid).writeAuditLog(AUDIT.KYC, STATUS.ERROR, "Licence details saved")
 
                 navController.navigate(RouteStatus(
                     status = result.status,
@@ -60,6 +60,7 @@ fun DriverLicenceButtons(authManager: AuthViewModel, kycViewModel: KycViewModel,
                 return@launch
             }
 
+            User(uid).writeAuditLog(AUDIT.KYC, STATUS.SUCCESS, "Licence details saved")
 
             navController.navigate(RouteStatus(
                 status = result.status,

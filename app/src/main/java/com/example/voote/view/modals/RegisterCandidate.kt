@@ -36,15 +36,16 @@ import com.example.voote.viewModel.ElectionViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
-import com.example.voote.ThisApplication
 import com.example.voote.blockchain.Connector
 import com.example.voote.contract.Voote
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.data.VotePreview
 import com.example.voote.firebase.user.User
 import com.example.voote.model.data.ElectionData
@@ -87,7 +88,7 @@ fun RegisterCandidate(contract: Voote, userAddress: String?, authManager: AuthVi
     val gasData = remember { mutableStateOf(VotePreview(null, null, null)) }
     val user = User(uid)
     val context = LocalContext.current
-
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         isLoading.value = true
@@ -102,8 +103,6 @@ fun RegisterCandidate(contract: Voote, userAddress: String?, authManager: AuthVi
         electionData.addAll(result)
         isLoading.value = false
     }
-
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
 
     fun onCandidateAddressChange(value: String) {
         val isValid = isValidBlockchainAddress(value.trim())
@@ -199,14 +198,17 @@ fun RegisterCandidate(contract: Voote, userAddress: String?, authManager: AuthVi
                 return
             }
 
-            val uploadResult = user.uploadCandidateImage(result, selectedImageUri!!, candidateAddress)
+            val uploadResult = user.uploadCandidateImage(result, selectedImageUri!!, candidateId.toString())
 
-            if(uploadResult.status == Status.ERROR) {
+            if(uploadResult.status == STATUS.ERROR) {
+                user.writeAuditLog(AUDIT.CREATE_CANDIDATE, STATUS.ERROR, receipt.transactionHash.toString())
                 sendNotification(context, "Error Uploading Image", "Failed to upload image")
                 isLoading.value = false
                 showPreviewDialog = false
                 return
             }
+
+            user.writeAuditLog(AUDIT.CREATE_CANDIDATE, STATUS.SUCCESS, receipt.transactionHash.toString())
 
             sendNotification(context, "Candidate registered successfully", "Transaction Success")
             isLoading.value = false

@@ -36,7 +36,6 @@ import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.launch
 
-
 @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 @Composable
 fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewModel: WalletViewModel) {
@@ -50,6 +49,7 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
     val breakDownResult = remember { mutableStateOf(BreakdownResult()) }
     val winnerResult = remember { mutableStateOf(WinnerResult()) }
 
+    val uid = authManager.userUid().toString()
     val contract = authManager.contract.collectAsState().value
     val walletData by walletViewModel.walletData.collectAsState()
     val coroutineScope = (context.applicationContext as ThisApplication).appScope
@@ -157,6 +157,7 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
 
                 ElectionCandidateColumn(
                     election = data,
+                    uid,
                     walletViewModel = walletViewModel,
                     contract = contract!!,
                     userAddress,

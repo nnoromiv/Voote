@@ -37,7 +37,10 @@ import com.composables.icons.lucide.Twitter
 import com.example.voote.ThisApplication
 import com.example.voote.blockchain.Connector
 import com.example.voote.contract.Voote
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.data.VotePreview
+import com.example.voote.firebase.user.User
 import com.example.voote.model.data.CandidateData
 import com.example.voote.model.data.ElectionData
 import com.example.voote.utils.helpers.openWebsite
@@ -50,7 +53,7 @@ import kotlinx.coroutines.withContext
 @Composable
 @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 @OptIn(ExperimentalMaterial3Api::class)
-fun CandidateModal(election: ElectionData?, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, selectedCandidate: CandidateData?, sheetState: SheetState, onDismissRequest: () -> Unit) {
+fun CandidateModal(election: ElectionData?, uid: String, walletViewModel: WalletViewModel, contract: Voote, userAddress: String?, selectedCandidate: CandidateData?, sheetState: SheetState, onDismissRequest: () -> Unit) {
 
     val isLoading = remember { mutableStateOf(false) }
     val connector = Connector(walletViewModel)
@@ -107,6 +110,8 @@ fun CandidateModal(election: ElectionData?, walletViewModel: WalletViewModel, co
     }
 
     suspend fun handleVoteCandidate() {
+        val user = User(uid)
+
         if(errorExist) {
             Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
@@ -122,25 +127,27 @@ fun CandidateModal(election: ElectionData?, walletViewModel: WalletViewModel, co
             }
 
             if(!receipt.isStatusOK) {
+                user.writeAuditLog(AUDIT.VOTE, STATUS.ERROR, receipt.transactionHash.toString())
                 sendNotification(context, "Error Creating Election", "Transaction failed")
                 isLoading.value = false
-                Log.d("SmartContract", "Election error: $receipt")
+                Log.d("SmartContract", "Vote error: $receipt")
                 return
             }
 
-            sendNotification(context, "Election created successfully", "Transaction Success")
+            sendNotification(context, "Vote cast successfully", "Transaction Success")
+            user.writeAuditLog(AUDIT.VOTE, STATUS.SUCCESS, receipt.transactionHash.toString())
             isLoading.value = false
             onDismissRequest()
-            Log.d("SmartContract", "Election created: $receipt")
+            Log.d("SmartContract", "Vote cast: $receipt")
         } catch (e: Exception) {
-            Log.e("SmartContract", "Failed to create election", e)
+            Log.e("SmartContract", "Failed to vote", e)
 
             if(e.message?.contains("insufficient funds") == true) {
                 sendNotification(context, "Insufficient funds", "Add Some tokens")
                 return
             }
             isLoading.value = false
-            sendNotification(context, "Failed to create election", "Retry Later")
+            sendNotification(context, "Failed to vote", "Retry Later")
         }
 
     }

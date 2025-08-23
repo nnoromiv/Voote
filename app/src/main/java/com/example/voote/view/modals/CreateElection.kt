@@ -29,11 +29,13 @@ import com.example.voote.viewModel.ElectionViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.example.voote.ThisApplication
 import com.example.voote.blockchain.Connector
 import com.example.voote.contract.Voote
+import com.example.voote.firebase.data.AUDIT
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.data.VotePreview
 import com.example.voote.firebase.user.User
 import com.example.voote.ui.components.Loader
@@ -66,8 +68,7 @@ fun CreateElectionModal(contract: Voote, userAddress: String?, authManager: Auth
     val gasData = remember { mutableStateOf(VotePreview(null, null, null)) }
     val user = User(uid)
     val context = LocalContext.current
-
-    val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val coroutineScope = rememberCoroutineScope()
 
     fun onElectionStartTimeChange(value: Long) {
         val todayStartMillis = LocalDate.now()
@@ -174,11 +175,14 @@ fun CreateElectionModal(contract: Voote, userAddress: String?, authManager: Auth
             )
 
             if(!result) {
+                user.writeAuditLog(AUDIT.CREATE_ELECTION, STATUS.ERROR, receipt.transactionHash.toString())
                 sendNotification(context, "Error Adding Election", "Failed to add election to database")
                 isLoading.value = false
                 showPreviewDialog = false
                 return
             }
+
+            user.writeAuditLog(AUDIT.CREATE_ELECTION, STATUS.SUCCESS, receipt.transactionHash.toString())
 
             sendNotification(context, "Election created successfully", "Transaction Success")
             isLoading.value = false

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RouteHome
 import com.example.voote.navigation.RouteScanFace
 import com.example.voote.navigation.RouteStatus
@@ -35,7 +35,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun FaceVerificationScreen(authManager: AuthViewModel, userImageUri: String, navController: NavController) {
     val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
     val verification = Verification(authManager)
 
@@ -56,7 +55,7 @@ fun FaceVerificationScreen(authManager: AuthViewModel, userImageUri: String, nav
         coroutineScope.launch {
             val result = verification.uploadImage(imageUri, fileName)
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
 
                 navController.navigate(RouteStatus(
                     status = result.status,

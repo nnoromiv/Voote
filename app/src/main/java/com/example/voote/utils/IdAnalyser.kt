@@ -14,7 +14,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.navigation.NavController
 import com.example.voote.ThisApplication
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.model.data.DriverLicenceExtractedData
 import com.example.voote.model.data.PassportExtractedData
 import com.example.voote.model.data.hasAnyField
@@ -75,7 +75,7 @@ class IdAnalyser (
 
                                             navController.navigate(
                                                 RouteStatus(
-                                                    status = Status.ERROR,
+                                                    status = STATUS.ERROR,
                                                     nextScreen = RouteScanID("passport").toJson()
                                                 )
                                             )

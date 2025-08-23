@@ -26,7 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.navigation.RouteMain
 import com.example.voote.navigation.RouteStatus
 import com.example.voote.navigation.toJson
@@ -71,7 +71,7 @@ fun ImportWalletScreen(walletViewModel: WalletViewModel, navController: NavContr
         isLoading.value = false
 
         navController.navigate(RouteStatus(
-            status = Status.SUCCESS,
+            status = STATUS.SUCCESS,
             nextScreen = RouteMain.toJson()
         ))
     }

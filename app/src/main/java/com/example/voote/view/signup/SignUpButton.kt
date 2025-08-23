@@ -24,9 +24,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.R
 import com.example.voote.firebase.auth.Auth
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.user.User
 import com.example.voote.navigation.RouteLogin
+import com.example.voote.navigation.RoutePersonalVerification
 import com.example.voote.navigation.RouteTokenVerification
 import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Loader
@@ -52,9 +53,6 @@ fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel:
     val emailErrorMessage by signUpViewModel.emailErrorMessage.collectAsState()
     val isPhoneNumberError by signUpViewModel.isPhoneNumberError.collectAsState()
     val phoneNumberErrorMessage by signUpViewModel.phoneNumberErrorMessage.collectAsState()
-
-//    val context = LocalContext.current
-//    val coroutineScope = (context.applicationContext as ThisApplication).appScope
     val coroutineScope = rememberCoroutineScope()
 
     val errorExist = firstName.isEmpty() || lastName.isEmpty() || password.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || isEmailError || isPhoneNumberError || emailErrorMessage.isNotEmpty() || phoneNumberErrorMessage.isNotEmpty()
@@ -73,7 +71,7 @@ fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel:
         coroutineScope.launch {
             val result = auth.signUp(email, firstName, lastName, phoneNumber, password)
 
-            if(result.status == Status.ERROR) {
+            if(result.status == STATUS.ERROR) {
                 Toast.makeText(activity, result.message, Toast.LENGTH_SHORT).show()
                 isLoading = false
                 return@launch
@@ -93,13 +91,19 @@ fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel:
             val getData = User(uid)
 
             val user = getData.getUser()
-            val kyc = getData.getKycData()
-
             if(user == null) {
                 Log.d("SignUp", "Error getting user")
                 isLoading = false
                 return@launch
             }
+
+            if(user.walletId.isEmpty()) {
+                navController.navigate(RoutePersonalVerification)
+                isLoading = false
+                return@launch
+            }
+
+            val kyc = getData.getKycData(user.walletId)
 
             userViewModel.setUserData(user)
             kycViewModel.setKycData(kyc)

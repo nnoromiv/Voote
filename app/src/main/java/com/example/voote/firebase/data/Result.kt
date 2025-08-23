@@ -1,21 +1,22 @@
 package com.example.voote.firebase.data
 
 import androidx.annotation.Keep
+import com.google.firebase.Timestamp
 import java.math.BigInteger
 
 sealed class AppResult<T>(
-    val status: Status,
+    val status: STATUS,
     val message: String,
     val data: T? = null
 ) {
-    class Success<T>(message: String = "", data: T? = null) : AppResult<T>(Status.SUCCESS, message, data)
-    class Error<T>(message: String) : AppResult<T>(Status.ERROR, message)
+    class Success<T>(message: String = "", data: T? = null) : AppResult<T>(STATUS.SUCCESS, message, data)
+    class Error<T>(message: String) : AppResult<T>(STATUS.ERROR, message)
 //    class Pending<T>(message: String = "") : AppResult<T>(Status.PENDING, message)
 //    class Continue<T>(message: String = "", data: T?) : AppResult<T>(Status.CONTINUE, message, data)
 }
 
 @Keep
-enum class Status {
+enum class STATUS {
     SUCCESS,
 //    PENDING,
 //    CONTINUE,
@@ -26,7 +27,16 @@ enum class Status {
 enum class TAG {
    NONE,
    ELECTION,
-   VOTE
+}
+
+@Keep
+enum class AUDIT {
+    CREATE_ELECTION,
+    CREATE_CANDIDATE,
+    VOTE,
+    LOGIN,
+    KYC,
+    NONE
 }
 
 data class VotePreview(
@@ -48,4 +58,11 @@ data class WinnerResult(
     val candidatesName: MutableList<String?>? = null,
     val candidatesAddress: MutableList<String?>? = null,
     val voteCount: BigInteger? = null,
+)
+
+data class AuditLogEntry(
+    val action: AUDIT = AUDIT.NONE,
+    val status: STATUS = STATUS.ERROR,
+    val details: String? = null,
+    val timestamp: Timestamp? = null
 )

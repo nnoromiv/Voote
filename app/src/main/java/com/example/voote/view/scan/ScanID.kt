@@ -8,7 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
-import com.example.voote.firebase.data.Status
+import com.example.voote.firebase.data.STATUS
 import com.example.voote.model.data.DriverLicenceExtractedData
 import com.example.voote.utils.helpers.RequestCameraPermission
 import com.example.voote.utils.IdAnalyser
@@ -38,7 +38,7 @@ fun ScanID(authManager: AuthViewModel, documentType: String, identityDetailsView
                 try {
                     val uploadResult = verification.uploadPassportDataToFirebase(result)
 
-                    if (uploadResult.status == Status.ERROR) {
+                    if (uploadResult.status == STATUS.ERROR) {
                         Toast.makeText(
                             context,
                             "Error: ${uploadResult.message}",
@@ -85,7 +85,7 @@ fun ScanID(authManager: AuthViewModel, documentType: String, identityDetailsView
                 try {
                     val uploadResult = verification.uploadDriverLicenceDataToFirebase(uploadData)
 
-                    if (uploadResult.status == Status.ERROR) {
+                    if (uploadResult.status == STATUS.ERROR) {
                         Toast.makeText(
                             context,
                             "Error: ${uploadResult.message}",
