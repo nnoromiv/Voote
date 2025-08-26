@@ -77,7 +77,7 @@ fun IDCameraView(
             )
 
             IconButton(
-                onClick = { onClick() },
+                onClick = onClick ,
                 enabled = cameraReady.value,
                 modifier = Modifier
                     .size(100.dp)
@@ -86,7 +86,7 @@ fun IDCameraView(
                 Icon(
                     imageVector = Icons.Outlined.Camera,
                     contentDescription = "Capture",
-                    tint = if (cameraReady.value) Color.White else Color.Gray,
+                    tint = if (cameraReady.value) Color.White else Color.Red,
                     modifier = Modifier
                         .size(100.dp)
                         .padding(bottom = 40.dp)

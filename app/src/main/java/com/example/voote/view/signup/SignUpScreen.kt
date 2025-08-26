@@ -12,15 +12,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.KycViewModel
+import com.example.voote.viewModel.SignUpViewModel
 import com.example.voote.viewModel.UserViewModel
 
 
 @Composable
-fun SignUpScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+fun SignUpScreen(signUpViewModel : SignUpViewModel = viewModel(), userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     val activity = LocalActivity.current as Activity
 
@@ -50,14 +52,16 @@ fun SignUpScreen(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                SignUpForm()
+                SignUpForm(
+                    signUpViewModel
+                )
             }
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                SignUpButton(activity, userViewModel, kycViewModel, navController)
+                SignUpButton( signUpViewModel, activity, userViewModel, kycViewModel, navController)
             }
         }
     }

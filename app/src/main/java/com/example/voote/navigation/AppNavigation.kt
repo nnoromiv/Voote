@@ -45,6 +45,7 @@ import com.example.voote.viewModel.HistoryViewModel
 import com.example.voote.viewModel.HomeViewModel
 import com.example.voote.viewModel.IdentityDetailsViewModel
 import com.example.voote.viewModel.KycViewModel
+import com.example.voote.viewModel.SignUpViewModel
 import com.example.voote.viewModel.UserViewModel
 import com.example.voote.viewModel.WalletViewModel
 import com.example.voote.viewModel.factory.HistoryViewModelFactory
@@ -61,6 +62,7 @@ fun AppNavigation() {
     val authManager: AuthViewModel = remember { AuthViewModel() }
     val kycViewModel: KycViewModel = remember { KycViewModel() }
     val walletViewModel: WalletViewModel = remember { WalletViewModel() }
+    val signUpViewModel: SignUpViewModel = remember { SignUpViewModel() }
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(context.applicationContext as Application)
     )
@@ -84,6 +86,7 @@ fun AppNavigation() {
 
     suspend fun loadApplicationWalletAndSetContract() {
         try {
+//            authManager.signOut()
             val walletContext = WalletManager(context)
             val walletFile = File(context.filesDir, "wallets").listFiles()?.firstOrNull()
 
@@ -96,10 +99,6 @@ fun AppNavigation() {
                     if (contract == null) {
                         Log.e("Connector", "Failed to connect: Contract is null.")
                     }
-
-//                    split entry hint excite remain whisper wink vault body have arrange engage
-//                    0xf1b882aaf4c9e0d08d0c6ab7387c3cee706f3b84
-//                    a6b19d9ebe577e781ef8efedd92d68f86021c6c9e47008825660d6efc5b780d4
 
                     authManager.setContract(contract)
                 }
@@ -152,7 +151,7 @@ fun AppNavigation() {
             return
         }
 
-        if(walletId.isEmpty() || kyc == null) {
+        if(walletId.isEmpty() || kyc == null || kyc.residentialAddress.isEmpty()) {
             navController.navigate(RoutePersonalVerification)
             return
         }
@@ -180,7 +179,7 @@ fun AppNavigation() {
         }
 
         composable<RouteSignup> {
-            SignUpScreen(userViewModel, kycViewModel, navController)
+            SignUpScreen(signUpViewModel,userViewModel, kycViewModel, navController)
         }
 
         composable<RouteTokenVerification> {
@@ -236,7 +235,7 @@ fun AppNavigation() {
 
         composable<RouteScanID> {
             val args = it.toRoute<RouteScanID>()
-            ScanID(authManager, args.documentType, identityDetailsViewModel, userViewModel, navController)
+            ScanID(authManager, args.documentType, identityDetailsViewModel, userViewModel, kycViewModel,navController)
         }
 
         composable<RouteScanFace> {

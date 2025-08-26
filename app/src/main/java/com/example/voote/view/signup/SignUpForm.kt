@@ -30,9 +30,8 @@ import com.example.voote.utils.helpers.validatePhoneNumber
 import com.example.voote.viewModel.SignUpViewModel
 
 @Composable
-fun SignUpForm() {
+fun SignUpForm(signUpViewModel : SignUpViewModel = viewModel()) {
 
-    val signUpViewModel : SignUpViewModel = viewModel()
     val email by signUpViewModel.email.collectAsState()
     val firstName by signUpViewModel.firstName.collectAsState()
     val lastName by signUpViewModel.lastName.collectAsState()

@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,8 +25,10 @@ import com.example.voote.viewModel.UserViewModel
 @Composable
 fun LoginScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
-    LaunchedEffect(Unit) {
-        if(authManager.isLoggedIn()) navController.navigate(RouteHome)
+    val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
+
+    LaunchedEffect(isLoggedIn) {
+        if(isLoggedIn) navController.navigate(RouteHome)
     }
 
     Scaffold {

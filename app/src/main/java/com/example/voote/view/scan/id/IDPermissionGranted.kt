@@ -44,8 +44,8 @@ fun IDPermissionGranted (context: Context, authManager: AuthViewModel, identityD
     val coroutineScope = rememberCoroutineScope()
     var lastCapturedImageUri by remember { mutableStateOf<Uri?>(null) }
     val dataIsExtracted by identityDetailsViewModel.isExtracted.collectAsState()
-    val passportData by identityDetailsViewModel.passportExtractedData.collectAsState()
-    val driverLicenceData by identityDetailsViewModel.driverLicenceExtractedData.collectAsState()
+    val passportData by identityDetailsViewModel.passportData.collectAsState()
+    val driverLicenceData by identityDetailsViewModel.driverLicenceData.collectAsState()
 
     val cameraProviderFuture = remember {
         ProcessCameraProvider.getInstance(context)
@@ -69,8 +69,6 @@ fun IDPermissionGranted (context: Context, authManager: AuthViewModel, identityD
             val fileName = documentType + "Image"
             val result = verification.uploadImage(imageUri, fileName)
 
-            Log.d("UPLOAD_IMAGE", result.toString())
-
             Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
 
             isLoading.value = false
@@ -86,13 +84,11 @@ fun IDPermissionGranted (context: Context, authManager: AuthViewModel, identityD
             }
 
             if(documentType == "passport"){
-                identityDetailsViewModel.clearPassportData()
                 navController.navigate(RouteStatus(
                     status = result.status,
                     nextScreen = RouteDriverLicenceVerification.toJson()
                 ))
             } else if (documentType == "driverLicence") {
-                identityDetailsViewModel.clearDriverLicenceData()
                 navController.navigate(RouteStatus(
                     status = result.status,
                     nextScreen = RouteAddressVerification.toJson()
@@ -145,7 +141,10 @@ fun IDPermissionGranted (context: Context, authManager: AuthViewModel, identityD
     } else {
         IDCameraView(
             previewView,
-            onClick = { handleCapture() },
+            onClick = {
+                Log.d("ID_DEBUG", "Clicked")
+                handleCapture()
+            },
             analyser,
             cameraReady
         )

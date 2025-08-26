@@ -37,7 +37,7 @@ class HomeViewModel(
             name = "${userData?.firstName} ${userData?.lastName}"
             userName = (userData?.lastName + userData?.uid?.substring(0, 4)).lowercase()
 
-            val result = election.getRandomFiveElections()
+            val result = election.getRandomFiveElectionsForAddress(userAddress!!)
 
             if (result.isNotEmpty()) {
                 allElectionData.value = result

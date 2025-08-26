@@ -30,9 +30,11 @@ import com.example.voote.model.data.KycData
 import com.example.voote.model.data.UserData
 import com.example.voote.ui.components.BottomNavigation
 import com.example.voote.ui.components.CountDown
+import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.ProfileBar
 import com.example.voote.ui.components.Text
 import com.example.voote.view.profile.modals.LogOutModal
+import com.example.voote.view.profile.modals.MnemonicModal
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.UserViewModel
@@ -54,6 +56,9 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
     val logOutSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var logOutShowSheet by remember { mutableStateOf(false) }
 
+    val mnemonicSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var mnemonicShowSheet by remember { mutableStateOf(false) }
+
     val name = userData?.firstName + " " + userData?.lastName
     val userName = (userData?.lastName + userData?.walletId?.substring(0, 4)).lowercase()
     val walletBalance = remember { mutableDoubleStateOf(0.0) }
@@ -73,15 +78,23 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
         }
     }
 
-
     LaunchedEffect(true) {
         loadData()
     }
 
     fun handleLogOutModal() {
+        mnemonicShowSheet = false
         logOutShowSheet = true
         coroutineScope.launch {
             logOutSheetState.show()
+        }
+    }
+
+    fun handleMnemonicModal() {
+        logOutShowSheet = false
+        mnemonicShowSheet = true
+        coroutineScope.launch {
+            mnemonicSheetState.show()
         }
     }
 
@@ -107,7 +120,7 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
 
             CountDown (
                 text = "Wallet",
-                "${walletBalance.doubleValue} SETH",
+                "${walletBalance.doubleValue} POL",
                 contractAddress = walletData?.address
             )
 
@@ -116,10 +129,10 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
                 kycData
             )
 
-//            PrimaryButton(
-//                text = "Back Up Wallet",
-//                onClick = { /*TODO*/ },
-//            )
+            PrimaryButton(
+                text = "View Mnemonic",
+                onClick = { handleMnemonicModal()},
+            )
 
         }
 
@@ -131,7 +144,23 @@ fun ProfileScreen( authManager: AuthViewModel, kycViewModel: KycViewModel, userV
                 navController,
                 sheetState = logOutSheetState,
                 onDismissRequest = {
-                    logOutShowSheet = false
+                    coroutineScope.launch {
+                        logOutSheetState.hide()
+                        logOutShowSheet = false
+                    }
+                }
+            )
+        }
+
+        if (mnemonicShowSheet) {
+            MnemonicModal(
+                walletViewModel,
+                sheetState = mnemonicSheetState,
+                onDismissRequest = {
+                    coroutineScope.launch {
+                        mnemonicSheetState.hide()
+                        mnemonicShowSheet = false
+                    }
                 }
             )
         }

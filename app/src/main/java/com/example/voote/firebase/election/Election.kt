@@ -92,7 +92,7 @@ class Election() {
         }
     }
 
-    suspend fun getRandomFiveElections(): List<ElectionData> {
+    suspend fun getRandomFiveElectionsForAddress(address: String): List<ElectionData> {
         return try {
             electionRef.get().await()
                 .documents
@@ -104,6 +104,10 @@ class Election() {
                         null
                     }
                 }
+                // ✅ filter by contractAddress OR registeredAddress containing given address
+                .filter { election ->
+                    election.contractAddress.equals(address, ignoreCase = true) || election.registeredAddresses.contains(address)
+                }
                 .shuffled()
                 .take(5)
         } catch (e: Exception) {
@@ -111,6 +115,7 @@ class Election() {
             emptyList()
         }
     }
+
 
     suspend fun addRegisteredAddressToElection(electionId: String, newAddress: String): Boolean {
         val electionRef = electionRef.document(electionId)

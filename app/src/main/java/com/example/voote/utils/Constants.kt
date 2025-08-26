@@ -12,7 +12,7 @@ import com.example.voote.R
 class Constants {
 
     val passportRegex = "^[A-Z0-9]{6,10}$".toRegex()
-    val driverLicenceRegex =  "^[A-Z0-9]{5,15}$".toRegex()
+    val driverLicenceRegex =  "^[A-Z0-9]{5,18}$".toRegex()
 
     val centuryFontFamily = FontFamily(
         Font(R.font.century_gothic, FontWeight.Normal),
@@ -25,10 +25,15 @@ class Constants {
         .fillMaxWidth()
         .fillMaxHeight()
 
-    val txHashUrl = "https://sepolia.etherscan.io/"
+    val txHashUrl = "https://polygonscan.com/"
+//    val testNetTxHashUrl = "https://sepolia.etherscan.io/"
 
-    val vooteContractAddress = "0x43dBDd94d852a7a0cce8996447Ab74De0B8D93BE"
+    val vooteContractAddress = "0xBE674B757c2a258d2aAd3843F3128b9CF0E898aa"
+//    val testNetVooteContractAddress = "0x43dBDd94d852a7a0cce8996447Ab74De0B8D93BE"
 
-    val rpcUrl = "https://eth-sepolia.g.alchemy.com/v2/FnpKmFie5JVqo8Rwgso0veb6UzKUpSDu"
+    val chainId = 137L
+    val rpcUrl = "https://polygon-mainnet.g.alchemy.com/v2/FnpKmFie5JVqo8Rwgso0veb6UzKUpSDu"
+// val testNetRpcUrl = "https://eth-sepolia.g.alchemy.com/v2/FnpKmFie5JVqo8Rwgso0veb6UzKUpSDu"
+
 
 }

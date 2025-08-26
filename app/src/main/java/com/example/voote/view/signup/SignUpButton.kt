@@ -39,11 +39,10 @@ import com.example.voote.viewModel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpButton(activity: Activity, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+fun SignUpButton(signUpViewModel : SignUpViewModel = viewModel(), activity: Activity, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     val auth = Auth()
 
-    val signUpViewModel : SignUpViewModel = viewModel()
     val email by signUpViewModel.email.collectAsState()
     val firstName by signUpViewModel.firstName.collectAsState()
     val lastName by signUpViewModel.lastName.collectAsState()

@@ -47,23 +47,23 @@ class IdAnalyser (
     )
 
     val coroutineScope = (context.applicationContext as ThisApplication).appScope
+    val triesFailed = mutableIntStateOf(0)
+
 
     @OptIn(ExperimentalGetImage::class)
     fun analyzeBitmap(bitmap: Bitmap, onlyDetectBox: Boolean = false) {
 
         val inputImage = InputImage.fromBitmap(bitmap, 0)
-        val triesFailed = mutableIntStateOf(0)
-
 
         recognizer.process(inputImage)
             .addOnSuccessListener { text ->
                 when (documentType) {
                     "passport" -> {
                         val (detected, extractedFields) = detectPassportTextAndExtract(text, inputImage, onlyDetectBox)
-                        isIDinBox.value = detected
+                        isIDinBox.value = true
 
                         coroutineScope.launch {
-                            delay(1000)
+                            delay(5000)
 
                             if (detected && !onlyDetectBox && shouldTriggerFeedback()) {
                                 if(extractedFields == null) {
@@ -92,12 +92,13 @@ class IdAnalyser (
                     }
                     "driverLicence" -> {
                         val (detected, extractedFields) = detectDriverLicenceAndExtract(text, inputImage, onlyDetectBox)
-                        isIDinBox.value = detected
 
-                        coroutineScope.launch {
-                            delay(1000)
+                        isIDinBox.value = true
 
-                            if (detected && !onlyDetectBox && shouldTriggerFeedback()) {
+                        if (detected && !onlyDetectBox && shouldTriggerFeedback()) {
+
+                            coroutineScope.launch {
+                                delay(5000) // wait for stability
                                 vibratePhone(context)
                                 onDriverLicenceDetected(extractedFields)
                             }
@@ -144,13 +145,12 @@ class IdAnalyser (
                 Log.e(TAG, "No MRZ found in this block")
             }
 
-            val mergedMrz = if (blockText.length >= 88) {
-                // Already two lines
-                blockText.chunked(44).joinToString("\n")
-            } else {
-                // Single long MRZ line
-                blockText.chunked(44).joinToString("\n")
+            val mergedMrz = when {
+                blockText.contains("\n") -> blockText
+                blockText.length >= 88   -> blockText.chunked(44).joinToString("\n")
+                else                     -> blockText
             }
+
 
             return Pair(true, extractPassportFields(mergedMrz))
         }
@@ -165,12 +165,14 @@ class IdAnalyser (
             val offset = block.centerOffsetScaled(scaleX, scaleY)
             if(!finalBox.contains(offset)) continue
 
+            val mrzBlocks = block.text
+
+            Log.d(TAG, "MRZ: $mrzBlocks")
+
 
             if(onlyDetectBox) {
                 return Pair(true, DriverLicenceExtractedData())
             }
-
-            val mrzBlocks = block.text
 
             return Pair(true, extractDriverLicenceFields(mrzBlocks))
         }
@@ -204,7 +206,7 @@ class IdAnalyser (
             (bitmapBox.left + (bitmapBox.width() / 4)),
             (bitmapBox.top + (bitmapBox.height() / 45)),
             (bitmapBox.right - (bitmapBox.width() / 4)),
-            (bitmapBox.bottom - (bitmapBox.height() / 4))
+            (bitmapBox.bottom - (bitmapBox.height() / 10))
         )
 
         val finalBox = if (isForLicenceBox) licenceBox else idTargetBox
@@ -261,7 +263,7 @@ class IdAnalyser (
             Log.e(TAG, "Error extracting fields", e)
         }
 
-        if(!details.passportNumber.isEmpty()) {
+        if(details.passportNumber.isEmpty()) {
             return null
         }
 
@@ -275,8 +277,9 @@ class IdAnalyser (
 
         try {
             // 1. Surname
-            details.surname = Regex("""1\.\s*([A-Z\s\-]+)""")
+            details.surname = Regex("""(?:1\.)?\s*([A-Z\s\-]{2,})""")
                 .find(text)?.groupValues?.get(1)?.trim() ?: ""
+
 
             // 2. Firstname (strip titles MR/MRS/MS etc.)
             details.firstname = Regex("""2\.\s*(.*)""")
@@ -299,6 +302,8 @@ class IdAnalyser (
         } catch (e: Exception) {
             Log.e(TAG, "Error extracting fields", e)
         }
+
+        Log.d(TAG,"Extracted: $details")
 
         if(!details.hasAnyField()) {
             return null

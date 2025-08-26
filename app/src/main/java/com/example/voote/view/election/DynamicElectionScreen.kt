@@ -8,9 +8,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -19,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,6 +44,7 @@ import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.WalletViewModel
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 
 @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 @Composable
@@ -155,6 +165,22 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
                     endTime = data.endTime
                 )
 
+                Text(
+                    text = "Winning Candidates",
+                    fontSize = 16,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                WinnerResultCard(
+                    winnerResult = winnerResult
+                )
+
+                Text(
+                    text = "All Candidates",
+                    fontSize = 16,
+                    fontWeight = FontWeight.Bold,
+                )
+
                 ElectionCandidateColumn(
                     election = data,
                     uid,
@@ -169,4 +195,60 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
     }
 }
 
+
+@Composable
+fun WinnerResultCard(winnerResult: MutableState<WinnerResult>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF00BA11),
+        )
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 16.dp)) {
+            val names = winnerResult.value.candidatesName ?: emptyList()
+            val addresses = winnerResult.value.candidatesAddress ?: emptyList()
+            val voteCount = winnerResult.value.voteCount ?: BigInteger.ZERO
+
+            if (names.isEmpty() && addresses.isEmpty()) {
+                Text("No winning candidates", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                LazyColumn {
+                    itemsIndexed(names) { index, name ->
+                        val address = addresses.getOrNull(index) ?: "Unknown Address"
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Name: ${name ?: "Unknown"}",
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Address: $address",
+                                    fontSize = 10,
+                                    softWrap = true
+                                )
+                            }
+                            Text(
+                                text = "Votes: $voteCount",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            thickness = DividerDefaults.Thickness,
+                            color = DividerDefaults.color
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 

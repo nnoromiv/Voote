@@ -179,12 +179,22 @@ fun RegisterCandidate(contract: Voote, userAddress: String?, authManager: AuthVi
                 return
             }
 
+            val uploadResult = user.uploadCandidateImage(candidateId.toString(), selectedImageUri!!)
+
+            if(uploadResult.status == STATUS.ERROR) {
+                user.writeAuditLog(AUDIT.CREATE_CANDIDATE, STATUS.ERROR, receipt.transactionHash.toString())
+                sendNotification(context, "Error Uploading Image", "Failed to upload image")
+                isLoading.value = false
+                showPreviewDialog = false
+                return
+            }
+
             val result = user.addCandidateToElection(
                 selectedId!!,
                 selectedElectionId!!,
                 candidateName,
                 candidateAddress,
-                selectedImageUri.toString(),
+                uploadResult.data.toString(),
                 candidateBiographyLink,
                 candidateCampaignLink,
                 receipt.transactionHash,
@@ -193,16 +203,6 @@ fun RegisterCandidate(contract: Voote, userAddress: String?, authManager: AuthVi
 
             if(result.isEmpty()) {
                 sendNotification(context, "Error Registering Candidate", "Failed to register candidate")
-                isLoading.value = false
-                showPreviewDialog = false
-                return
-            }
-
-            val uploadResult = user.uploadCandidateImage(result, selectedImageUri!!, candidateId.toString())
-
-            if(uploadResult.status == STATUS.ERROR) {
-                user.writeAuditLog(AUDIT.CREATE_CANDIDATE, STATUS.ERROR, receipt.transactionHash.toString())
-                sendNotification(context, "Error Uploading Image", "Failed to upload image")
                 isLoading.value = false
                 showPreviewDialog = false
                 return

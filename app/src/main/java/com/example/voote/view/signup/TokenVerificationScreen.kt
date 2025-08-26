@@ -54,7 +54,7 @@ fun TokenVerificationScreen(phoneNumber: String, navController: NavController) {
     val storedVerificationId by tokenVerificationViewModel.storedVerificationId.collectAsState()
 
     LaunchedEffect(Unit) {
-
+        Log.d("TokenVerificationScreen", "Sending code to $phoneNumber")
         val result = auth.sendCode(activity, phoneNumber)
 
         if(result.isFailure) {
