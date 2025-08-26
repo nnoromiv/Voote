@@ -1,7 +1,6 @@
 package com.example.voote.view.kyc
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +11,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -23,22 +22,24 @@ import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.UserViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.example.voote.firebase.auth.Verification
 import com.example.voote.firebase.data.STATUS
-import com.example.voote.navigation.RouteSignup
+import com.example.voote.navigation.RouteLogin
 import com.example.voote.viewModel.WalletViewModel
 
 
 @Composable
 fun PersonalVerificationScreen(authViewModel: AuthViewModel, userViewModel: UserViewModel, walletViewModel: WalletViewModel, navController: NavController) {
 
-    val context = LocalContext.current
     val userData by userViewModel.userData.collectAsState()
     val verification = Verification(authViewModel)
 
-    LaunchedEffect(Unit) {
-        if (userData == null) {
-            navController.navigate(RouteSignup)
+    val isLoggedIn by remember { derivedStateOf{ authViewModel.isLoggedIn() } }
+
+    LaunchedEffect(isLoggedIn) {
+        if(!isLoggedIn) {
+            navController.navigate(RouteLogin)
         }
 
         val walletId = userData?.walletId
@@ -50,7 +51,6 @@ fun PersonalVerificationScreen(authViewModel: AuthViewModel, userViewModel: User
             return@LaunchedEffect
         }
 
-        Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
     }
 
     Scaffold {
@@ -97,7 +97,6 @@ fun PersonalVerificationScreen(authViewModel: AuthViewModel, userViewModel: User
                     .fillMaxWidth(),
             ) {
                 PersonalVerificationButton(
-                    context,
                     authViewModel,
                     navController
                 )

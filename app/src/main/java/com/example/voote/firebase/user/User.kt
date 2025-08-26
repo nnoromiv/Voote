@@ -163,9 +163,9 @@ class User(uid: String) {
         }
     }
 
-    suspend fun uploadCandidateImage(id: String, imageUri: Uri, fileName: String): AppResult<Any> {
+    suspend fun uploadCandidateImage(id: String, imageUri: Uri): AppResult<Any> {
         try {
-            val imageRef = storageRef.child("candidates/$id/$fileName.jpg")
+            val imageRef = storageRef.child("candidates/$id/$id.jpg")
 
             // Upload file
             imageRef.putFile(imageUri).await()
@@ -173,19 +173,7 @@ class User(uid: String) {
             // Get download URL
             val downloadUrl = imageRef.downloadUrl.await()
 
-            val ref = candidateRef
-                .whereEqualTo("id", id).get().await()
-
-            if(ref.isEmpty) {
-                return AppResult.Error("User does not exist")
-            }
-
-            val candidateId = ref.documents[0].id
-
-            // Save URL to Firestore
-            candidateRef.document(candidateId).update("candidateImageUrl", downloadUrl.toString()).await()
-
-            return AppResult.Success("Image uploaded successfully")
+            return AppResult.Success("Image uploaded successfully", downloadUrl.toString())
         } catch (e: Exception) {
             Log.e("UploadImage", "Error uploading image", e)
             return AppResult.Error("Failed to upload image: ${e.localizedMessage}")

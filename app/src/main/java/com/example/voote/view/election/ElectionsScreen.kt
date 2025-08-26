@@ -14,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -38,7 +39,7 @@ import com.example.voote.viewModel.WalletViewModel
 @Composable
 fun ElectionsScreen(authManager: AuthViewModel, walletViewModel: WalletViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
-    val isLoggedIn = authManager.isLoggedIn()
+    val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
     val isLoading = remember { mutableStateOf(false) }
 
     val election = Election()

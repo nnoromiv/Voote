@@ -1,23 +1,35 @@
 package com.example.voote.view.scan
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.net.toUri
 import com.example.voote.utils.QRCodeAnalyser
 import com.example.voote.utils.helpers.RequestCameraPermission
+import com.example.voote.utils.helpers.copyToClipboard
+import com.example.voote.utils.helpers.isValidBlockchainAddress
 import com.example.voote.view.scan.qr.QrPermissionGranted
 
 @Composable
 fun ScanQR(){
     val context = LocalContext.current
+    val isScanned = remember { mutableStateOf(false) }
 
     val qrAnalyser = QRCodeAnalyser (
         onQrCodeScanned = { result ->
-            Toast.makeText(context, "Scanned: $result", Toast.LENGTH_LONG).show()
-            val browserIntent = Intent(Intent.ACTION_VIEW, result.toUri())
-            context.startActivity(browserIntent)
+            val isValid = isValidBlockchainAddress(result)
+
+            if(!isValid) {
+                Toast.makeText(context, "Invalid address", Toast.LENGTH_LONG).show()
+                return@QRCodeAnalyser
+            }
+
+            if(isScanned.value) return@QRCodeAnalyser
+
+            copyToClipboard(context, "address", result)
+
+            isScanned.value = true
         }
     )
 

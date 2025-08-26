@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +64,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel(), authManager: AuthVi
     val history by viewModel.auditLogs.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    val isLoggedIn = authManager.isLoggedIn()
+    val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
 
     val context = LocalContext.current
     val constant = Constants()

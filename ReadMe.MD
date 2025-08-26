@@ -31,8 +31,8 @@ This project is a **secure, Kotlin-based digital voting platform** that integrat
   * **Public Ledger**: https://sepolia.etherscan.io/address/0x43dbdd94d852a7a0cce8996447ab74de0b8d93be
 
 * Main Net Information
-    * **Public Address**: 0xe59966672b6853D52A83Bc6Ddbdf341278316166
-    * **Public Ledger**: https://polygonscan.com/address/0xe59966672b6853d52a83bc6ddbdf341278316166
+    * **Public Address**: 0xBE674B757c2a258d2aAd3843F3128b9CF0E898aa
+    * **Public Ledger**: https://polygonscan.com/address/0xBE674B757c2a258d2aAd3843F3128b9CF0E898aa
 
 * Smart Contract Repository: https://github.com/nnoromiv/Voote-Contract
 

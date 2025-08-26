@@ -1,12 +1,15 @@
 package com.example.voote.view.kyc
 
-import android.content.Context
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -20,25 +23,24 @@ import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.AuthViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun PersonalVerificationButton(context: Context, authViewModel: AuthViewModel,  navController: NavController) {
+fun PersonalVerificationButton(authViewModel: AuthViewModel, navController: NavController) {
 
-    val isLoggedIn = authViewModel.isLoggedIn()
+    val isLoggedIn by remember { derivedStateOf{ authViewModel.isLoggedIn() } }
+    val coroutineScope = rememberCoroutineScope()
 
-    fun handleClick(isSkipped: Boolean) {
-        if (!isLoggedIn) {
-            Toast.makeText(context, "Log in to continue", Toast.LENGTH_SHORT).show()
-            navController.navigate(RouteLogin)
-            return
-        }
+    fun handleSkip() {
+        Log.d("PersonalVerificationButton", "handleSkip called $isLoggedIn")
+        coroutineScope.launch {
+            if (!isLoggedIn) {
+                navController.navigate(RouteLogin)
+                return@launch
+            }
 
-        if (isSkipped) {
             navController.navigate(RouteHome)
-        } else {
-            navController.navigate(RoutePassportVerification)
         }
-
     }
 
     Column(
@@ -46,13 +48,15 @@ fun PersonalVerificationButton(context: Context, authViewModel: AuthViewModel,  
     ) {
         PrimaryButton(
             text = "Begin Verification",
-            onClick = { handleClick(false) },
+            onClick = {
+                navController.navigate(RoutePassportVerification)
+            },
             modifier = Modifier.padding(vertical = 10.dp)
         )
 
         COutlinedButton(
             text = "Skip",
-            onClick = { handleClick(true) },
+            onClick = { handleSkip() },
             modifier = Modifier.padding(vertical = 10.dp)
         )
         Row(

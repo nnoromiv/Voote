@@ -25,6 +25,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
+import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.tx.gas.DefaultGasProvider
 import org.web3j.utils.Convert
@@ -68,10 +69,18 @@ class Connector(walletViewModel: WalletViewModel)  {
                 }
             }
 
+            val chainId = BigInteger.valueOf(constant.chainId)
+
+            val txManager = RawTransactionManager(
+                web3j,
+                credential,
+                chainId.toLong()
+            )
+
             val contract = Voote.load(
                 constant.vooteContractAddress,
                 web3j,
-                credential,
+                txManager,
                 gasProvider
             )
 
@@ -228,16 +237,19 @@ class Connector(walletViewModel: WalletViewModel)  {
         return null
     }
 
-    fun getWalletBalance(address: String): BigDecimal? {
-        return try {
-            val ethBalance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).sendAsync().get()
+    suspend fun getWalletBalance(address: String): BigDecimal? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val ethBalance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send()
+                val balanceInWei = ethBalance.balance
 
-            val balanceInWei = ethBalance.balance
-            Convert.fromWei(balanceInWei.toString(), Convert.Unit.ETHER)
-        } catch (e: Exception) {
-            Log.e("Connector", "Failed to get wallet balance", e)
-            null
+                Convert.fromWei(balanceInWei.toString(), Convert.Unit.ETHER)
+            } catch (e: Exception) {
+                Log.e("Connector", "Failed to get wallet balance", e)
+                null
+            }
         }
     }
+
 
 }
