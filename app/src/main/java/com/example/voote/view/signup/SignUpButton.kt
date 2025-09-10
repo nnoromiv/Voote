@@ -27,19 +27,16 @@ import com.example.voote.firebase.auth.Auth
 import com.example.voote.firebase.data.STATUS
 import com.example.voote.firebase.user.User
 import com.example.voote.navigation.RouteLogin
-import com.example.voote.navigation.RoutePersonalVerification
 import com.example.voote.navigation.RouteTokenVerification
 import com.example.voote.ui.components.CTextButton
 import com.example.voote.ui.components.Loader
 import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.ui.components.Text
-import com.example.voote.viewModel.KycViewModel
 import com.example.voote.viewModel.SignUpViewModel
-import com.example.voote.viewModel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpButton(signUpViewModel : SignUpViewModel = viewModel(), activity: Activity, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+fun SignUpButton(signUpViewModel : SignUpViewModel = viewModel(), activity: Activity, navController: NavController) {
 
     val auth = Auth()
 
@@ -96,23 +93,12 @@ fun SignUpButton(signUpViewModel : SignUpViewModel = viewModel(), activity: Acti
                 return@launch
             }
 
-            if(user.walletId.isEmpty()) {
-                navController.navigate(RoutePersonalVerification)
-                isLoading = false
-                return@launch
-            }
-
-            val kyc = getData.getKycData(user.walletId)
-
-            userViewModel.setUserData(user)
-            kycViewModel.setKycData(kyc)
-            Auth()
-
-            isLoading = false
-
             navController.navigate(RouteTokenVerification(
                 phoneNumber = phoneNumber,
             ))
+
+            isLoading = false
+
         }
 
     }

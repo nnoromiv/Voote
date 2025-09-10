@@ -28,8 +28,6 @@ fun LoginScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycVie
 
     LaunchedEffect(isLoggedIn) {
         authManager.signOut()
-        kycViewModel.cleanKycData()
-        userViewModel.cleanUserData()
     }
 
     Scaffold {

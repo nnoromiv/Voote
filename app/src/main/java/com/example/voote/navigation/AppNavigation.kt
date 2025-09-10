@@ -179,7 +179,7 @@ fun AppNavigation() {
         }
 
         composable<RouteSignup> {
-            SignUpScreen(signUpViewModel,userViewModel, kycViewModel, navController)
+            SignUpScreen(signUpViewModel, navController)
         }
 
         composable<RouteTokenVerification> {

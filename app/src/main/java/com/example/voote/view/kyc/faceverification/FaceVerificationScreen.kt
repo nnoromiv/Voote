@@ -72,8 +72,6 @@ fun FaceVerificationScreen(authManager: AuthViewModel, userImageUri: String, nav
 
         }
 
-        isLoading.value = false
-
     }
 
     if(isLoading.value) {

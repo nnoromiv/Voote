@@ -117,7 +117,6 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
                 return@launch
             }
 
-            isLoading = false
             navController.navigate(RouteHome)
         }
     }
