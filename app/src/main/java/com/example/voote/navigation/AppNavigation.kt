@@ -110,7 +110,6 @@ fun AppNavigation() {
 
     suspend fun loadAndNavigateUserOnLogin() {
         if (!isLoggedIn) {
-            navController.navigate(RouteLogin)
             return
         }
 
