@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voote.navigation.RouteHome
 import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.AuthViewModel
@@ -28,7 +27,9 @@ fun LoginScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycVie
     val isLoggedIn by remember { derivedStateOf{ authManager.isLoggedIn() } }
 
     LaunchedEffect(isLoggedIn) {
-        if(isLoggedIn) navController.navigate(RouteHome)
+        authManager.signOut()
+        kycViewModel.cleanKycData()
+        userViewModel.cleanUserData()
     }
 
     Scaffold {

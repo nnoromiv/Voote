@@ -21,7 +21,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.example.voote.firebase.auth.Verification
 import com.example.voote.firebase.data.STATUS
-import com.example.voote.navigation.RouteHome
+import com.example.voote.navigation.RouteLogin
 import com.example.voote.navigation.RouteScanFace
 import com.example.voote.navigation.RouteStatus
 import com.example.voote.navigation.toJson
@@ -67,12 +67,13 @@ fun FaceVerificationScreen(authManager: AuthViewModel, userImageUri: String, nav
 
             navController.navigate(RouteStatus(
                 status = result.status,
-                nextScreen = RouteHome.toJson()
+                nextScreen = RouteLogin.toJson()
             ))
 
-            isLoading.value = false
-
         }
+
+        isLoading.value = false
+
     }
 
     if(isLoading.value) {
