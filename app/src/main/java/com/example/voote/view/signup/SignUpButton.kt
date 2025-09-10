@@ -106,7 +106,6 @@ fun SignUpButton(signUpViewModel : SignUpViewModel = viewModel(), activity: Acti
 
             userViewModel.setUserData(user)
             kycViewModel.setKycData(kyc)
-            Auth()
 
             isLoading = false
 
@@ -114,6 +113,8 @@ fun SignUpButton(signUpViewModel : SignUpViewModel = viewModel(), activity: Acti
                 phoneNumber = phoneNumber,
             ))
         }
+
+        isLoading = false
 
     }
 

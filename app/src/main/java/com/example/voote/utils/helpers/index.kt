@@ -1,13 +1,10 @@
 package com.example.voote.utils.helpers
 
 import android.Manifest
-import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.location.Location
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
@@ -24,15 +21,10 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.compose.ui.geometry.Rect
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.example.voote.R
 import com.example.voote.firebase.data.AppResult
 import com.example.voote.utils.Constants
 import com.example.voote.utils.IdAnalyser
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.web3j.crypto.MnemonicUtils
 import java.security.KeyStore
@@ -232,33 +224,6 @@ fun convertLongToDate(timeStamp: Long, pattern: String = "dd/MM/yyyy"): String {
     val date = Date(timeStamp)
     val format = SimpleDateFormat(pattern, Locale.getDefault())
     return format.format(date)
-}
-
-fun getUserLocation(activity: Activity, context: Context, onLocationDetected: (Location) -> Unit, onError: (String) -> Unit) {
-    val permissionState = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-
-    if(permissionState != PackageManager.PERMISSION_GRANTED) {
-        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1001)
-        return
-    }
-
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    fusedLocationClient.getCurrentLocation(
-        Priority.PRIORITY_HIGH_ACCURACY,
-        CancellationTokenSource().token)
-        .addOnSuccessListener { location ->
-            if(location != null) {
-                onLocationDetected(location)
-            }
-            else {
-                onError("Location is unavailable")
-                return@addOnSuccessListener
-            }
-        }
-        .addOnFailureListener {
-            onError("Failed to get location")
-            return@addOnFailureListener
-        }
 }
 
 fun uriToBitmap(context: Context, imageUri: Uri?): Bitmap? {
