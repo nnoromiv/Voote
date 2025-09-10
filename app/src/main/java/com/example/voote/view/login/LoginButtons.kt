@@ -109,11 +109,13 @@ fun LoginButtons(userViewModel: UserViewModel, kycViewModel: KycViewModel, navCo
                 navController.navigate(RouteTokenVerification(
                     phoneNumber = phoneNumber
                 ))
+                isLoading = false
                 return@launch
             }
 
             if(walletId.isEmpty() || kyc == null) {
                 navController.navigate(RoutePersonalVerification)
+                isLoading = false
                 return@launch
             }
 

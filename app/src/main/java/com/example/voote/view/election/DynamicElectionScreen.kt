@@ -99,7 +99,7 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
                 )
             }
 
-            if(resultWinner != null) {
+            if(resultWinner != null && resultWinner.component3() > BigInteger.ZERO) {
                 winnerResult.value = WinnerResult(
                     candidatesName = resultWinner.component1(),
                     candidatesAddress = resultWinner.component2(),
@@ -157,7 +157,7 @@ fun DynamicElectionScreen(id: String, authManager: AuthViewModel, walletViewMode
 
                 CountCard(
                     label = "Winner Vote Count",
-                    value = winnerResult.value.voteCount.toString()
+                    value = if(winnerResult.value.voteCount == null) { "-" } else { winnerResult.value.voteCount.toString() }
                 )
 
                 CountDown(

@@ -128,7 +128,7 @@ fun CandidateModal(election: ElectionData?, uid: String, walletViewModel: Wallet
 
             if(!receipt.isStatusOK) {
                 user.writeAuditLog(AUDIT.VOTE, STATUS.ERROR, receipt.transactionHash.toString())
-                sendNotification(context, "Error Creating Election", "Transaction failed")
+                sendNotification(context, "Error Voting", "Transaction failed")
                 isLoading.value = false
                 Log.d("SmartContract", "Vote error: $receipt")
                 return
