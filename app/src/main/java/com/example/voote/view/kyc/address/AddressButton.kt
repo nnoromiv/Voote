@@ -1,6 +1,5 @@
 package com.example.voote.view.kyc.address
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -11,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -27,13 +25,11 @@ import com.example.voote.ui.components.PrimaryButton
 import com.example.voote.viewModel.AddressViewModel
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
-import com.example.voote.viewModel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+fun AddressButton(authManager: AuthViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val isLoading = remember { mutableStateOf(false) }
     val verification = Verification(authManager)
@@ -47,8 +43,6 @@ fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycV
 
     val kycData by kycViewModel.kycData.collectAsState()
 
-    val walletId = userViewModel.userData.collectAsState().value?.walletId ?: ""
-
     val errorExist = country.isEmpty() || state.isEmpty() || city.isEmpty() || street.isEmpty() || postCode.isEmpty()
 
 
@@ -58,12 +52,6 @@ fun AddressButton(authManager: AuthViewModel, userViewModel: UserViewModel, kycV
         isLoading.value = true
 
         if(residentialAddress.isEmpty()) {
-            isLoading.value = false
-            return
-        }
-
-        if(walletId.isEmpty()) {
-            Toast.makeText(context, "Error saving address", Toast.LENGTH_SHORT).show()
             isLoading.value = false
             return
         }

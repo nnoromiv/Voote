@@ -17,11 +17,10 @@ import com.example.voote.ui.components.Logo
 import com.example.voote.ui.components.Text
 import com.example.voote.viewModel.AuthViewModel
 import com.example.voote.viewModel.KycViewModel
-import com.example.voote.viewModel.UserViewModel
 
 
 @Composable
-fun AddressScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycViewModel: KycViewModel, navController: NavController) {
+fun AddressScreen(authManager: AuthViewModel, kycViewModel: KycViewModel, navController: NavController) {
 
     Scaffold {
             innerPadding ->
@@ -63,7 +62,6 @@ fun AddressScreen(authManager: AuthViewModel, userViewModel: UserViewModel, kycV
             ) {
                 AddressButton(
                     authManager,
-                    userViewModel,
                     kycViewModel,
                     navController
                 )

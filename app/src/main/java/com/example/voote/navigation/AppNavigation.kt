@@ -200,7 +200,7 @@ fun AppNavigation() {
         }
 
         composable<RouteAddressVerification>{
-            AddressScreen(authManager, userViewModel, kycViewModel, navController)
+            AddressScreen(authManager, kycViewModel, navController)
         }
 
         composable<RouteFaceVerification>{

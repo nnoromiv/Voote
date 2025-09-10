@@ -35,7 +35,7 @@ fun AddressForm() {
 
         TextField(
             value = country,
-            onValueChange = { addressViewModel.setCountry(it.trim()) },
+            onValueChange = { addressViewModel.setCountry(it) },
             label = { Text(
                 "Country",
             ) },
@@ -43,7 +43,7 @@ fun AddressForm() {
 
         TextField(
             value = state,
-            onValueChange = { addressViewModel.setState(it.trim()) },
+            onValueChange = { addressViewModel.setState(it) },
             label = { Text(
                 "State",
             ) },
@@ -51,7 +51,7 @@ fun AddressForm() {
 
         TextField(
             value = city,
-            onValueChange = { addressViewModel.setCity(it.trim()) },
+            onValueChange = { addressViewModel.setCity(it) },
             label = { Text(
                 "City",
             ) },
@@ -66,7 +66,7 @@ fun AddressForm() {
 
         TextField(
             value = street,
-            onValueChange = { addressViewModel.setStreet(it.trim()) },
+            onValueChange = { addressViewModel.setStreet(it) },
             label = { Text(
                 "Street",
             ) },
@@ -81,7 +81,7 @@ fun AddressForm() {
 
         TextField(
             value = postCode,
-            onValueChange = { addressViewModel.setPostCode(it.trim()) },
+            onValueChange = { addressViewModel.setPostCode(it) },
             label = { Text(
                 "Post Code",
             ) },
